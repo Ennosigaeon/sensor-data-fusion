@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 #TODO: test this code
-#this code probably has some mistakes
 
 import time, sys, math
 import ps_drone
@@ -21,6 +20,10 @@ time.sleep(0.5)
 
 drone.trim()
 landed = True
+
+#speed of the drone
+speed = 0.05
+setSpeed(speed)
 
 #current position of the drone
 #TODO implement z
@@ -71,7 +74,7 @@ while (1):
   time_new = datetime.datetime.now()
   time_diff = (time_new-time_old).microseconds
   time_total = (time_new-time_start).microseconds
-  time_old = new
+  time_old = time_new
   
   raw_file.write("(time:{0};vx:{1};vy:{2};vz:{3};phi:{4})\n".format(time_total, vx, vy, vz, phid))
   
@@ -102,6 +105,7 @@ while (1):
         print " drone is now in air"
         landed = False
       else:
+        drone.stop()
         drone.land()
         time.sleep(3)
         print " drone has landed"
@@ -127,10 +131,20 @@ while (1):
     elif key == 'x':
       drone.stop()
       print " drone stopped"
+    elif key == '+':
+      if speed<=0.99: speed+=0.01
+      setSpeed(speed)
+      print " drone speed is now "+str(speed)
+    elif key == '-':
+      if speed>0.01: speed-=0.01
+      setSpeed(speed)
+      print " drone speed is now "+str(speed)
     else:
-      print ""
+      print " end program"
+      drone.stop()
       drone.land()
       time.sleep(3)
+      print "  drone has landed"
       plot_file.write("plt.plot(x,y);\n")
       plot_file.write("plt.show();")
       plot_file.close()

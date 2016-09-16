@@ -69,7 +69,7 @@ while (1):
   time_new = datetime.datetime.now()
   time_diff = (time_new-time_old).microseconds
   time_total = (time_new-time_start).microseconds
-  time_old = new
+  time_old = time_new
   
   raw_file.write("(time:{0};vx:{1};vy:{2};vz:{3};phi:{4})\n".format(time_total, vx, vy, vz, phid))
   

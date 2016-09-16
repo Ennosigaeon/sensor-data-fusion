@@ -1,6 +1,5 @@
 import argparse
 import numpy as np
-from curses import ascii
 from cv2 import aruco
 
 import cv2
@@ -33,7 +32,7 @@ if args.target == "board":
     cv2.imwrite(args.output, image)
     cv2.imshow('Image', image)
     while (True):
-        if (cv2.waitKey(1) & 0xFF == ord(ascii.ESC)):
+        if (cv2.waitKey(1) & 0xFF == 27):
             break
 
 if args.target == "marker":

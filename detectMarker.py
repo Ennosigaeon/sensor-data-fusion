@@ -1,7 +1,6 @@
 import argparse
 import numpy as np
 import re
-from curses import ascii
 from cv2 import aruco
 
 import cv2
@@ -67,7 +66,7 @@ while True:
     if ('output' in locals()):
         output.write(frame)
     cv2.imshow('frame', frame)
-    if (cv2.waitKey(1) & 0xFF == ord(ascii.ESC)):
+    if (cv2.waitKey(1) & 0xFF == 27):
         break
 
 if ('output' in locals()):

@@ -37,6 +37,12 @@ time_start = datetime.datetime.now()
 #variable for measuring the time between two datapoints
 time_old = datetime.datetime.now()
 
+try: 
+  os.makedirs(path)
+except OSError:
+  if not os.path.isdir(path):
+    raise
+
 #plot_file is an executable file plotting the calculated x and y values
 #raw_file stores all gathered data from the drone as well as the corresponding timestamps
 minfree=1;

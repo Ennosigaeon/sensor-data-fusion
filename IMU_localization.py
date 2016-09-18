@@ -6,6 +6,7 @@ import time, sys, math
 import ps_drone
 import datetime
 import matplotlib.pyplot as plt
+import os
 
 #Drone start
 drone = ps_drone.Drone()
@@ -21,7 +22,7 @@ time.sleep(0.5)
 drone.trim()
 
 #current position of the drone
-#TODO implement z
+#TODO test implementation of z
 x = 0
 y = 0
 z = 0
@@ -38,11 +39,17 @@ time_old = datetime.datetime.now()
 
 #plot_file is an executable file plotting the calculated x and y values
 #raw_file stores all gathered data from the drone as well as the corresponding timestamps
-plot_file = open("plotdata.py", "w")
+minfree=1;
+while os.path.lexists("./data/plotdata"+str(minfree)+".py"): minfree+=1
+while os.path.lexists("./data/rawdata"+str(minfree)+".txt"): minfree+=1
+plot_file = open("./data/plotdata"+str(minfree)+".py", "w")
 plot_file.write("#!/usr/bin/env python\n\n")
 plot_file.write("import matplotlib.pyplot as plt\n")
 plot_file.write("x=[];y=[];")
-raw_file = open("rawdata.txt", "w")
+raw_file = open("./data/rawdata"+str(minfree)+".txt", "w")
+
+print "Create output file: ./data/plotdata"+str(minfree)+".py"
+print "Create output file: ./data/rawdata"+str(minfree)+".txt"
 
 #set phi-offset
 print "phi:"+str(drone.NavData["demo"][2][2])
@@ -65,13 +72,15 @@ while (1):
   phid=drone.NavData["demo"][2][2]
   phi=((phid-phio)/180)*math.pi
   
+  z=drone.NavData["demo"][3]
+  
   #measuring total time and time since last datapoint
   time_new = datetime.datetime.now()
   time_diff = (time_new-time_old).microseconds
   time_total = (time_new-time_start).microseconds
   time_old = time_new
   
-  raw_file.write("(time:{0};vx:{1};vy:{2};vz:{3};phi:{4})\n".format(time_total, vx, vy, vz, phid))
+  raw_file.write("(time:{0};vx:{1};vy:{2};vz:{3};phi:{4};a:{5})\n".format(time_total, vx, vy, vz, phid, z))
   
   #TODO check geometry
   #x+=(math.cos(phi)*vx+math.sin(phi)*vy)*time_diff/1000000
@@ -81,7 +90,7 @@ while (1):
   x+=(vx)*time_diff/1000000
   y+=(vy)*time_diff/1000000
   
-  plot_file.write("x+=[{0}];y+=[{0}];\n".format(x, y))
+  plot_file.write("x+=[{0}];y+=[{1}];\n".format(x, y))
   
   #plot new datapoint
   #TODO better plotting algorithm
@@ -95,6 +104,7 @@ while (1):
     plot_file.write("plt.plot(x,y);\n")
     plot_file.write("plt.show();")
     plot_file.close()
+    raw_file.close()
     plt.pause(5)
     sys.exit()
   NDC = drone.NavDataCount

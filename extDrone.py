@@ -12,6 +12,7 @@ class Drone(ps_drone.Drone):
         super(Drone, self).__init__()
         self.groundCamEnabled = True
         self.lastIMC = self.VideoImageCount
+        self.lastNDC = self.NavDataCount
 
     def reset(self):
         """
@@ -33,7 +34,13 @@ class Drone(ps_drone.Drone):
         # Wait for next video frame
         while self.lastIMC == self.VideoImageCount:
             time.sleep(0.01)
+        self.lastIMC = self.VideoImageCount
         return self.VideoImage
+        
+    def getNextDataSet(self):
+        while self.NavDataCount==self.lastNDC: time.sleep(0.001) #waiting for new datapoint
+        self.lastNDC = self.NavDataCount
+        return self.NavData
 
     def frontCam(self, *args):
         """

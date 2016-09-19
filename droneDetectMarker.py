@@ -21,12 +21,9 @@ output = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'XVID'), config.fp
 
 drone = extDrone.Drone()
 drone.startup()
-drone.reset()
-drone.useDemoMode(True)
 
 drone.setConfigAllID()
 drone.sdVideo()
-drone.frontCam()
 drone.groundCam()
 drone.videoFPS(config.fps)
 
@@ -40,8 +37,7 @@ drone.showVideo()
 print "Press ESC to stop recording"
 print "Press space to switch cameras"
 
-start = time.time()
-while abs(time.time() - start) < 20:
+while True:
     image = drone.getNextVideoFrame()
     detectMarker.detectMarkers(image, config)
     output.write(image)

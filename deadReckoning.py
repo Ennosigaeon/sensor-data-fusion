@@ -11,6 +11,7 @@ import time
 import matplotlib.pyplot as plt
 
 import extDrone
+from map import Position
 
 
 def createFolder(path):
@@ -22,14 +23,19 @@ def createFolder(path):
 
 
 class DeadReckoning:
-    def __init__(self, drone):
-        self.x = 0
-        self.y = 0
-        self.z = 0
-        self.historyX = [0]
-        self.historyY = [0]
+    def __init__(self):
+        self.pos = Position(0,0)
+        self.historyPos = [Position(0,0)]
+        self.historyTime = [datetime.datetime.now()]
+        
+        self.historyConfirmed = [0]
+        self.historyPosCor = [Position(0,0)]
+        
         self.timeStart = datetime.datetime.now()
         self.lastTimestamp = datetime.datetime.now()
+        self.phio = 0
+        
+    def setPhiToZero(self, drone):
         self.phio = drone.NavData["demo"][2][2]
 
     def updatePos(self, navData):
@@ -46,16 +52,39 @@ class DeadReckoning:
 
         # measuring total time and time since last datapoint
         time = datetime.datetime.now()
-        diff = (time - self.lastTimestamp).microseconds
-        total = (time - self.timeStart).microseconds
+        deltaTime = (time - self.lastTimestamp).microseconds+1000000*(time - self.lastTimestamp).seconds
         self.lastTimestamp = time
 
         # calculating expected position
-        self.x += (math.cos(phi) * vx - math.sin(phi) * vy) * diff / 1000000
-        self.y -= (math.cos(phi) * vy + math.sin(phi) * vx) * diff / 1000000
+        self.pos = self.pos.updatePosition(vx, vy, phi, deltaTime)
 
-        self.historyX.append(self.x)
-        self.historyY.append(self.y)
+        self.historyPos.append(self.pos)
+        self.historyPosCor(self.pos)
+        self.historyTime.append(time)
+        
+    def updateConfPos(self, x, y):
+        time=datetime.datetime.now()
+        self.historyPos.append(Position(x,y))
+        self.historyPosCor.append(Position(x,y))
+        self.historyTime.append(time)
+        self.historyConfirmed.append(len(self.historyPos)-1)
+        
+        self.correctPos()
+    
+    def correctPos(self):
+        time = self.historyTime[self.historyConfirmed[-1]]
+        deltaTimestamp = self.historyTime[self.historyConfirmed[-1]]-self.historyTime[self.historyConfirmed[-2]]
+        deltaTotal = deltaTimestamp.microseconds + 1000000*deltaTimestamp.seconds
+        deltaPosX = self.historyPos[self.historyConfirmed[-1]].x-self.historyPos[self.historyConfirmed[-1]-1].x
+        deltaPosY = self.historyPos[self.historyConfirmed[-1]].y-self.historyPos[self.historyConfirmed[-1]-1].y
+        
+        for i in range(self.historyConfirmed[-2], self.historyConfirmed[-1]):
+            deltaTimestamp = self.historyTime[i]-self.historyTime[self.historyConfirmed[-2]]
+            deltaTime = deltaTimestamp.microseconds + 1000000*deltaTimestamp.seconds
+            fracTime = 1.0 * deltaTime / deltaTotal
+            self.historyPosCor[i].x = self.historyPos[i].x+fracTime*deltaPosX
+            self.historyPosCor[i].y = self.historyPos[i].x+fracTime*deltaPosX
+        
 
     # TODO implement
     def storeRaw(self, file):
@@ -73,14 +102,15 @@ class DeadReckoning:
     def updateRTPlot(self):
         # plot new datapoint
         # TODO better plotting algorithm
-        plt.plot([self.historyX[-1], self.x], [self.historyY[-1], self.y], facecolor="b")
+        plt.plot([self.historyPos[-2].x, self.pos.x], [self.historyPos[-2].y, self.pos.y], facecolor="b")
         plt.pause(0.05)
 
 
 if (__name__ == "__main__"):
     drone = extDrone.Drone()
     drone.startup()
-    DR = DeadReckoning(drone)
+    DR = DeadReckoning()
+    DR.setPhiToZero(drone)
     DR.initRTPlot()
 
     while (1):
@@ -103,5 +133,7 @@ if (__name__ == "__main__"):
 
                 plt.pause(5)
                 sys.exit()
+            if (key == '1'):
+                pass
         else:
             time.sleep(0.01)

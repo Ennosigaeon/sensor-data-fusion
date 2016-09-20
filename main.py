@@ -69,6 +69,7 @@ while (1):
     output.write(image)
 
     if (len(markers) > 0):
+		print "Detected marker/s {}".format(markers)
         position = map.determinePosition(markers)
         DR.updateConfPos(position.x, position.y)
 

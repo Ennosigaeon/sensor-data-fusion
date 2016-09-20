@@ -72,7 +72,6 @@ class DeadReckoning:
         self.correctPos()
     
     def correctPos(self):
-        time = self.historyTime[self.historyConfirmed[-1]]
         deltaTimestamp = self.historyTime[self.historyConfirmed[-1]]-self.historyTime[self.historyConfirmed[-2]]
         deltaTotal = deltaTimestamp.microseconds + 1000000*deltaTimestamp.seconds
         deltaPosX = self.historyPos[self.historyConfirmed[-1]].x-self.historyPos[self.historyConfirmed[-1]-1].x
@@ -83,7 +82,7 @@ class DeadReckoning:
             deltaTime = deltaTimestamp.microseconds + 1000000*deltaTimestamp.seconds
             fracTime = 1.0 * deltaTime / deltaTotal
             self.historyPosCor[i].x = self.historyPos[i].x+fracTime*deltaPosX
-            self.historyPosCor[i].y = self.historyPos[i].x+fracTime*deltaPosX
+            self.historyPosCor[i].y = self.historyPos[i].y+fracTime*deltaPosY
         
 
     # TODO implement

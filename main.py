@@ -2,23 +2,20 @@
 
 # TODO: test this code
 
-import datetime
-import math
+import argparse
 import os
 import sys
 import time
-import argparse
 
 import cv2
 import matplotlib.pyplot as plt
 
-import extDrone
 import deadReckoning
 import detectMarker
+import extDrone
 from config import Config
 
-
-#Get calibration data for configuration and output path for video
+# Get calibration data for configuration and output path for video
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--calibration", action="store", type=str, required=True, help="Path to calibration file")
 parser.add_argument("-o", "--output", action="store", type=str, required=True,
@@ -31,16 +28,15 @@ config.fps = 15.0
 output = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'XVID'), config.fps,
                          (config.imageWidth, config.imageHeight))
 
-
-#Initialize drone and deadReckoning
+# Initialize drone and deadReckoning
 drone = extDrone.Drone()
 drone.startup()
 # TODO: Initialize deadReckoning with y-axis pointing north
-DR = DeadReckoning(drone)
+DR = deadReckoning.DeadReckoning(drone)
 DR.initRTPlot()
+markerDetector = detectMarker.MarkerDetector(config)
 
-
-#Start camera
+# Start camera
 drone.setConfigAllID()
 drone.sdVideo()
 drone.groundCam()
@@ -50,51 +46,51 @@ CDC = drone.ConfigDataCount
 while CDC == drone.ConfigDataCount:
     time.sleep(0.001)
 
-
-#Show video
+# Show video
 drone.startVideo()
 drone.showVideo()
-
 
 # TODO: Implement map
 
 
-#Drone execution loop
+# Drone execution loop
 while (1):
-	#Wait for new NavData and update deadReckoning
+    # Wait for new NavData and update deadReckoning
     navData = drone.getNextDataSet()
 
     DR.updatePos(navData)
     DR.updateRTPlot()
 
-	#Marker detection
-	image = drone.getNextVideoFrame()
-    detectMarker.detectMarkers(image, config)
+    # Marker detection
+    image = drone.getNextVideoFrame()
+    markerDetector.detect(image)
     output.write(image)
 
-	# TODO: Determine position on map
+    # TODO: Determine position on map
 
-	# TODO: Implement autonomous flying (fly to marker or random walk)
+    # TODO: Implement autonomous flying (fly to marker or random walk)
 
-	#Control input
+    # Control input
     key = drone.getKey()
     if key:
         drone.simplePiloting(key)
         if (key == '0'):
-			#Stop drone
-            print "Program stopped"
-            drone.failSafeStopDrone()
-
-			#Release output
-			output.release()
-
-			#Store raw data
-            minFree = 1
-            while os.path.lexists("./data/rawdata" + str(minFree) + ".txt"): minFree += 1
-            with open("./data/rawdata" + str(minFree) + ".txt", "w") as raw_file:
-                DR.storeRaw(raw_file)
-
-            plt.pause(5)
-            sys.exit()
+            break
     else:
         time.sleep(0.01)
+
+# Stop drone
+print "Program stopped"
+drone.failSafeStopDrone()
+
+# Release output
+output.release()
+
+# Store raw data
+minFree = 1
+while os.path.lexists("./data/rawdata" + str(minFree) + ".txt"): minFree += 1
+with open("./data/rawdata" + str(minFree) + ".txt", "w") as raw_file:
+    DR.storeRaw(raw_file)
+
+plt.pause(5)
+sys.exit()

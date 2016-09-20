@@ -18,6 +18,8 @@ config.fps = 15.0
 output = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'XVID'), config.fps,
                          (config.imageWidth, config.imageHeight))
 
+markerDetector = detectMarker.MarkerDetector(config)
+
 drone = extDrone.Drone()
 drone.startup()
 
@@ -38,7 +40,7 @@ print "Press space to switch cameras"
 
 while True:
     image = drone.getNextVideoFrame()
-    detectMarker.detectMarkers(image, config)
+    markerDetector.detect(image)
     output.write(image)
 
     key = drone.getKey()

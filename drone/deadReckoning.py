@@ -6,7 +6,7 @@ import datetime
 import math
 import os
 import sys
-import time
+from time import sleep
 
 import matplotlib.pyplot as plt
 
@@ -28,71 +28,61 @@ class DeadReckoning:
         self.historyPos = [position]
         self.historyPosCor = [position]
         self.historyTime = [datetime.datetime.now()]
-        
         self.historyConfirmed = []
-        
         self.timeStart = datetime.datetime.now()
         self.lastTimestamp = datetime.datetime.now()
-        self.phio = -180
-        
-    def setPhiToZero(self, drone):
-        self.phio = drone.NavData["demo"][2][2]
+        self.phio = 0
 
-    def updatePos(self, vx, vy, vz, phid):
-        # adjusting expected speed
-        # vx = navData["demo"][4][0]
-        # vy = navData["demo"][4][1]
-        # vz = navData["demo"][4][2]
+    def setPhiToZero(self, phi):
+        self.phio = phi
 
+    def updatePos(self, speed, phid):
         # adjusting angle (phid is in degree, phi is in radian)
-        # phid = navData["demo"][2][2]
         phi = ((phid - self.phio) / 180) * math.pi
-
-        # z = navData["demo"][3]
 
         # measuring total time and time since last datapoint
         time = datetime.datetime.now()
-        deltaTime = (time - self.lastTimestamp).microseconds+1000000*(time - self.lastTimestamp).seconds
+        deltaTime = (time - self.lastTimestamp).total_seconds()
         self.lastTimestamp = time
 
         # calculating expected position
-        self.pos = self.pos.updatePosition(vx, vy, phi, deltaTime)
+        self.pos = self.pos.updatePosition(speed[0], speed[1], phi, deltaTime)
 
         self.historyPos.append(self.pos)
         self.historyPosCor.append(self.pos)
         self.historyTime.append(time)
-        
-    def updateConfPos(self, x, y):
-        time=datetime.datetime.now()
-        self.pos = Position(x,y)
-        self.historyPos.append(Position(x,y))
-        self.historyPosCor.append(Position(x,y))
+
+    def updateConfPos(self, position):
+        time = datetime.datetime.now()
+        # TODO use Kalman filter
+        self.pos = position
+        self.historyPos.append(position)
+        self.historyPosCor.append(position)
         self.historyTime.append(time)
-        self.historyConfirmed.append(len(self.historyPos)-1)
-        
+        self.historyConfirmed.append(len(self.historyPos) - 1)
+
         self.correctPos()
-    
+
     def correctPos(self):
-        if len(self.historyConfirmed)>1:
-            deltaTimestamp = self.historyTime[self.historyConfirmed[-1]]-self.historyTime[self.historyConfirmed[-2]]
-            deltaTotal = deltaTimestamp.microseconds + 1000000*deltaTimestamp.seconds
-            deltaPosX = self.historyPos[self.historyConfirmed[-1]].x-self.historyPos[self.historyConfirmed[-1]-1].x
-            deltaPosY = self.historyPos[self.historyConfirmed[-1]].y-self.historyPos[self.historyConfirmed[-1]-1].y
-            
+        if len(self.historyConfirmed) > 1:
+            deltaTimestamp = self.historyTime[self.historyConfirmed[-1]] - self.historyTime[self.historyConfirmed[-2]]
+            deltaTotal = deltaTimestamp.microseconds + 1000000 * deltaTimestamp.seconds
+            deltaPosX = self.historyPos[self.historyConfirmed[-1]].x - self.historyPos[self.historyConfirmed[-1] - 1].x
+            deltaPosY = self.historyPos[self.historyConfirmed[-1]].y - self.historyPos[self.historyConfirmed[-1] - 1].y
+
             for i in range(self.historyConfirmed[-2], self.historyConfirmed[-1]):
-                deltaTimestamp = self.historyTime[i]-self.historyTime[self.historyConfirmed[-2]]
-                deltaTime = deltaTimestamp.microseconds + 1000000*deltaTimestamp.seconds
+                deltaTimestamp = self.historyTime[i] - self.historyTime[self.historyConfirmed[-2]]
+                deltaTime = deltaTimestamp.microseconds + 1000000 * deltaTimestamp.seconds
                 fracTime = 1.0 * deltaTime / deltaTotal
-                self.historyPosCor[i].x = self.historyPos[i].x+fracTime*deltaPosX
-                self.historyPosCor[i].y = self.historyPos[i].y+fracTime*deltaPosY
+                self.historyPosCor[i].x = self.historyPos[i].x + fracTime * deltaPosX
+                self.historyPosCor[i].y = self.historyPos[i].y + fracTime * deltaPosY
         else:
-            deltaPosX = self.historyPos[self.historyConfirmed[-1]].x-self.historyPos[self.historyConfirmed[-1]-1].x
-            deltaPosY = self.historyPos[self.historyConfirmed[-1]].y-self.historyPos[self.historyConfirmed[-1]-1].y
-            
+            deltaPosX = self.historyPos[self.historyConfirmed[-1]].x - self.historyPos[self.historyConfirmed[-1] - 1].x
+            deltaPosY = self.historyPos[self.historyConfirmed[-1]].y - self.historyPos[self.historyConfirmed[-1] - 1].y
+
             for i in range(0, self.historyConfirmed[-1]):
-                self.historyPosCor[i].x = self.historyPos[i].x+deltaPosX
-                self.historyPosCor[i].y = self.historyPos[i].y+deltaPosY
-        
+                self.historyPosCor[i].x = self.historyPos[i].x + deltaPosX
+                self.historyPosCor[i].y = self.historyPos[i].y + deltaPosY
 
     # TODO implement
     def storeRaw(self, file):
@@ -110,21 +100,21 @@ class DeadReckoning:
     def updateRTPlot(self):
         # plot new datapoint
         # TODO better plotting algorithm
-        plt.plot([self.historyPos[-2].x, self.pos.x], [self.historyPos[-2].y, self.pos.y])
+        plt.plot([self.historyPos[-2].x, self.pos.x], [self.historyPos[-2].y, self.pos.y], color="b")
         plt.pause(0.05)
 
 
 if (__name__ == "__main__"):
     drone = extDrone.Drone()
     drone.startup()
-    DR = DeadReckoning()
+    DR = DeadReckoning(Position(0, 0))
     DR.setPhiToZero(drone)
     DR.initRTPlot()
 
     while (1):
         navData = drone.getNextDataSet()
 
-        DR.updatePos(navData)
+        DR.updatePos(drone.getSpeed(), drone.getOrientation())
         DR.updateRTPlot()
 
         key = drone.getKey()
@@ -144,4 +134,4 @@ if (__name__ == "__main__"):
             if (key == '1'):
                 pass
         else:
-            time.sleep(0.01)
+            sleep(0.01)

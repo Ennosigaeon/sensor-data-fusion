@@ -29,8 +29,8 @@ output = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'XVID'), config.fp
 # Initialize drone and deadReckoning
 drone = extDrone.Drone()
 drone.startup()
-DR = deadReckoning.DeadReckoning()
-DR.setPhiToZero(drone)
+DR = deadReckoning.DeadReckoning(Position(0, 0))
+DR.setPhiToZero(drone.getOrientation())
 DR.initRTPlot()
 markerDetector = detectMarker.MarkerDetector(config)
 
@@ -60,7 +60,7 @@ while (1):
     # Wait for new NavData and update deadReckoning
     navData = drone.getNextDataSet()
 
-    DR.updatePos(navData)
+    DR.updatePos(drone.getSpeed(), drone.getOrientation())
     DR.updateRTPlot()
 
     # Marker detection
@@ -69,9 +69,9 @@ while (1):
     output.write(image)
 
     if (len(markers) > 0):
-		print "Detected marker/s {}".format(markers)
+        print "Detected marker/s {}".format(markers)
         position = map.determinePosition(markers)
-        DR.updateConfPos(position.x, position.y)
+        DR.updateConfPos(position)
 
     # TODO: Implement autonomous flying (fly to marker or random walk)
 

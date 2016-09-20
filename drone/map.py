@@ -6,15 +6,15 @@ class Position:
     Represents a three dimensional position of an object.
     """
 
-    def __init__(self, x=None, y=None, z=0, phi=0):
+    def __init__(self, x, y, z=0, phi=0):
         self.x = x
         self.y = y
         self.z = z
         self.phi = phi
 
     def updatePosition(self, vx, vy, phi, deltaTime):
-        x = self.x + (math.cos(phi) * vx - math.sin(phi) * vy) * deltaTime / 1000000
-        y = self.y - (math.cos(phi) * vy + math.sin(phi) * vx) * deltaTime / 1000000
+        x = self.x + (math.cos(phi) * vx - math.sin(phi) * vy) * deltaTime
+        y = self.y - (math.cos(phi) * vy + math.sin(phi) * vx) * deltaTime
         return Position(x, y, 0, phi)
 
 
@@ -51,19 +51,17 @@ class Map:
         return self.landmarks.values()
 
     def determinePosition(self, markers):
-		"""
-		Determines position based on detected markers
-		:return: Estimated position
-		"""
-		x = 0.0
-		y = 0.0
-		for arucoId, distance in markers:
-			if (arucoId not in self.landmarks):
-				raise ValueError("Invalid marker id {}".format(arucoId))
-			x += self.landmarks[arucoId].position.x - distance[0]
-			y += self.landmarks[arucoId].position.y - distance[1]
-		x = x / len(markers)
-		y = y / len(markers)
-		position = Position(x,y)
-		return position
-
+        """
+        Determines position based on detected markers
+        :return: Estimated position
+        """
+        x = 0.0
+        y = 0.0
+        for arucoId, distance in markers:
+            if (arucoId not in self.landmarks):
+                raise ValueError("Invalid marker id {}".format(arucoId))
+            x += self.landmarks[arucoId].position.x - distance[0]
+            y += self.landmarks[arucoId].position.y - distance[1]
+        x /= len(markers)
+        y /= len(markers)
+        return Position(x, y)

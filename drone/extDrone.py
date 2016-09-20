@@ -134,9 +134,17 @@ class Drone(ps_drone.Drone):
             self.stop()
             print " drone stopped"
 
-    def orientation(self, navData):
-        original_yaw = navData["demo"][2][2]
-        print "original_yaw: " + str(original_yaw)      
-        yaw = 180 + original_yaw
-        return (yaw)
+    def getSpeed(self):
+        """
+        Returns the current velocity of the drone.
+        :return: Array with three values for velocity in three directions.
+        """
+        return self.NavData["demo"][4]
 
+    def getOrientation(self):
+        """
+        Returns the current orientation of the drone.
+        :return: Current orientation
+        """
+        # Add 180 to make 0 degree == north
+        return self.NavData["demo"][2][2] + 180

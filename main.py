@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 from drone import deadReckoning, detectMarker, extDrone
 from drone.config import Config
-from drone.map import Map
+from drone.map import Map, Landmark, Position
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--calibration", action="store", type=str, required=True, help="Path to calibration file")
@@ -48,8 +48,12 @@ while CDC == drone.ConfigDataCount:
 drone.startVideo()
 drone.showVideo()
 
-# TODO: Implement map
 map = Map()
+map.addLandmark(Landmark(0, Position(0, 0)))
+map.addLandmark(Landmark(1, Position(1, 0)))
+map.addLandmark(Landmark(2, Position(1, 2)))
+map.addLandmark(Landmark(3, Position(0, 2)))
+map.addLandmark(Landmark(4, Position(0.5, 1)))
 
 # Drone execution loop
 while (1):

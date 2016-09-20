@@ -35,6 +35,7 @@ output = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'XVID'), config.fp
 #Initialize drone and deadReckoning
 drone = extDrone.Drone()
 drone.startup()
+# TODO: Initialize deadReckoning with y-axis pointing north
 DR = DeadReckoning(drone)
 DR.initRTPlot()
 
@@ -55,6 +56,9 @@ drone.startVideo()
 drone.showVideo()
 
 
+# TODO: Implement map
+
+
 #Drone execution loop
 while (1):
 	#Wait for new NavData and update deadReckoning
@@ -67,6 +71,10 @@ while (1):
 	image = drone.getNextVideoFrame()
     detectMarker.detectMarkers(image, config)
     output.write(image)
+
+	# TODO: Determine position on map
+
+	# TODO: Implement autonomous flying (fly to marker or random walk)
 
 	#Control input
     key = drone.getKey()

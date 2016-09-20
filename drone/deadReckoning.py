@@ -11,6 +11,7 @@ from time import sleep
 import matplotlib.pyplot as plt
 
 import extDrone
+from drone.plot import RealTimePlot
 from map import Position
 
 
@@ -32,6 +33,7 @@ class DeadReckoning:
         self.timeStart = datetime.datetime.now()
         self.lastTimestamp = datetime.datetime.now()
         self.phio = 0
+        self.rtp = RealTimePlot()
 
     def setPhiToZero(self, phi):
         self.phio = phi
@@ -52,8 +54,13 @@ class DeadReckoning:
         self.historyPosCor.append(self.pos)
         self.historyTime.append(time)
 
+        histPos = self.historyPos[-2]
+        self.rtp.drawLine([histPos.x, histPos.y], [self.pos.x, self.pos.y], "b")
+
     def updateConfPos(self, position):
         time = datetime.datetime.now()
+        self.rtp.drawLine([position.x, position.y], [self.pos.x, self.pos.y], "r")
+
         # TODO use Kalman filter
         self.pos = position
         self.historyPos.append(position)
@@ -65,14 +72,13 @@ class DeadReckoning:
 
     def correctPos(self):
         if len(self.historyConfirmed) > 1:
-            deltaTimestamp = self.historyTime[self.historyConfirmed[-1]] - self.historyTime[self.historyConfirmed[-2]]
-            deltaTotal = deltaTimestamp.microseconds + 1000000 * deltaTimestamp.seconds
+            deltaTotal = (self.historyTime[self.historyConfirmed[-1]] -
+                          self.historyTime[self.historyConfirmed[-2]]).total_seconds()
             deltaPosX = self.historyPos[self.historyConfirmed[-1]].x - self.historyPos[self.historyConfirmed[-1] - 1].x
             deltaPosY = self.historyPos[self.historyConfirmed[-1]].y - self.historyPos[self.historyConfirmed[-1] - 1].y
 
             for i in range(self.historyConfirmed[-2], self.historyConfirmed[-1]):
-                deltaTimestamp = self.historyTime[i] - self.historyTime[self.historyConfirmed[-2]]
-                deltaTime = deltaTimestamp.microseconds + 1000000 * deltaTimestamp.seconds
+                deltaTime = (self.historyTime[i] - self.historyTime[self.historyConfirmed[-2]]).total_seconds()
                 fracTime = 1.0 * deltaTime / deltaTotal
                 self.historyPosCor[i].x = self.historyPos[i].x + fracTime * deltaPosX
                 self.historyPosCor[i].y = self.historyPos[i].y + fracTime * deltaPosY
@@ -97,11 +103,10 @@ class DeadReckoning:
         plt.ion()
         plt.pause(0.05)
 
-    def updateRTPlot(self):
-        # plot new datapoint
-        # TODO better plotting algorithm
-        plt.plot([self.historyPos[-2].x, self.pos.x], [self.historyPos[-2].y, self.pos.y], color="b")
-        plt.pause(0.05)
+    def drawCorrectedPath(self):
+        for i in range(len(self.historyPosCor) - 1):
+            self.rtp.drawLine([self.historyPosCor[i].x, self.historyPosCor[i].y],
+                              [self.historyPosCor[i + 1].x, self.historyPosCor[i + 1].y], "r")
 
 
 if (__name__ == "__main__"):
@@ -115,7 +120,6 @@ if (__name__ == "__main__"):
         navData = drone.getNextDataSet()
 
         DR.updatePos(drone.getSpeed(), drone.getOrientation())
-        DR.updateRTPlot()
 
         key = drone.getKey()
         if key:

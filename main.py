@@ -61,7 +61,6 @@ while (1):
     navData = drone.getNextDataSet()
 
     DR.updatePos(drone.getSpeed(), drone.getOrientation())
-    DR.updateRTPlot()
 
     # Marker detection
     image = drone.getNextVideoFrame()

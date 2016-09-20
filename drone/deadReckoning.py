@@ -38,17 +38,17 @@ class DeadReckoning:
     def setPhiToZero(self, drone):
         self.phio = drone.NavData["demo"][2][2]
 
-    def updatePos(self, navData):
+    def updatePos(self, vx, vy, vz, phid):
         # adjusting expected speed
-        vx = navData["demo"][4][0]
-        vy = navData["demo"][4][1]
-        vz = navData["demo"][4][2]
+        # vx = navData["demo"][4][0]
+        # vy = navData["demo"][4][1]
+        # vz = navData["demo"][4][2]
 
         # adjusting angle (phid is in degree, phi is in radian)
-        phid = navData["demo"][2][2]
-        phi = (((phid - self.phio)%360) / 180) * math.pi
+        # phid = navData["demo"][2][2]
+        phi = ((phid - self.phio) / 180) * math.pi
 
-        z = navData["demo"][3]
+        # z = navData["demo"][3]
 
         # measuring total time and time since last datapoint
         time = datetime.datetime.now()
@@ -59,7 +59,7 @@ class DeadReckoning:
         self.pos = self.pos.updatePosition(vx, vy, phi, deltaTime)
 
         self.historyPos.append(self.pos)
-        self.historyPosCor(self.pos)
+        self.historyPosCor.append(self.pos)
         self.historyTime.append(time)
         
     def updateConfPos(self, x, y):
@@ -103,14 +103,14 @@ class DeadReckoning:
 
     # noinspection PyMethodMayBeStatic
     def initRTPlot(self):
-        plt.axis([-4000, 4000, -4000, 4000])
+        plt.axis([-4, 4, -4, 4])
         plt.ion()
         plt.pause(0.05)
 
     def updateRTPlot(self):
         # plot new datapoint
         # TODO better plotting algorithm
-        plt.plot([self.historyPos[-2].x, self.pos.x], [self.historyPos[-2].y, self.pos.y], facecolor="b")
+        plt.plot([self.historyPos[-2].x, self.pos.x], [self.historyPos[-2].y, self.pos.y])
         plt.pause(0.05)
 
 

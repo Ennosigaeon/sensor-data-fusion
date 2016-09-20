@@ -10,10 +10,8 @@ import time
 import cv2
 import matplotlib.pyplot as plt
 
-import deadReckoning
-import detectMarker
-import extDrone
-from config import Config
+from drone import deadReckoning, detectMarker, extDrone
+from drone.config import Config
 
 # Get calibration data for configuration and output path for video
 parser = argparse.ArgumentParser()

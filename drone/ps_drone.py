@@ -20,8 +20,15 @@
 # Dedicated to my beloved wife.
 ###########
 
-import threading, select, socket, time, tempfile, multiprocessing, struct, os, sys
-import thread, signal, subprocess
+import multiprocessing
+import os
+import select
+import socket
+import struct
+import subprocess
+import sys
+import tempfile
+import threading
 
 if os.name == 'posix':	import termios, fcntl	# for getKey(), ToDo: Reprogram for Windows
 

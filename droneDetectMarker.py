@@ -3,9 +3,8 @@ import time
 
 import cv2
 
-import detectMarker
-import extDrone
-from config import Config
+from drone import detectMarker, extDrone
+from drone.config import Config
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--calibration", action="store", type=str, required=True, help="Path to calibration file")

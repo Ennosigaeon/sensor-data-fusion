@@ -2,11 +2,15 @@
 
 #TODO: test this code
 
-import time, sys, math
-import ps_drone
 import datetime
-import matplotlib.pyplot as plt
+import math
 import os
+import sys
+import time
+
+import matplotlib.pyplot as plt
+
+from drone import ps_drone
 
 #Drone start
 drone = ps_drone.Drone()

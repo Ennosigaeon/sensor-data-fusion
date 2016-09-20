@@ -23,17 +23,17 @@ def createFolder(path):
 
 
 class DeadReckoning:
-    def __init__(self):
-        self.pos = Position(0,0)
-        self.historyPos = [Position(0,0)]
+    def __init__(self, position):
+        self.pos = position
+        self.historyPos = [position]
+        self.historyPosCor = [position]
         self.historyTime = [datetime.datetime.now()]
         
-        self.historyConfirmed = [0]
-        self.historyPosCor = [Position(0,0)]
+        self.historyConfirmed = []
         
         self.timeStart = datetime.datetime.now()
         self.lastTimestamp = datetime.datetime.now()
-        self.phio = 0
+        self.phio = -180
         
     def setPhiToZero(self, drone):
         self.phio = drone.NavData["demo"][2][2]
@@ -46,7 +46,7 @@ class DeadReckoning:
 
         # adjusting angle (phid is in degree, phi is in radian)
         phid = navData["demo"][2][2]
-        phi = ((phid - self.phio) / 180) * math.pi
+        phi = (((phid - self.phio)%360) / 180) * math.pi
 
         z = navData["demo"][3]
 
@@ -64,6 +64,7 @@ class DeadReckoning:
         
     def updateConfPos(self, x, y):
         time=datetime.datetime.now()
+        self.pos = Position(x,y)
         self.historyPos.append(Position(x,y))
         self.historyPosCor.append(Position(x,y))
         self.historyTime.append(time)
@@ -72,17 +73,25 @@ class DeadReckoning:
         self.correctPos()
     
     def correctPos(self):
-        deltaTimestamp = self.historyTime[self.historyConfirmed[-1]]-self.historyTime[self.historyConfirmed[-2]]
-        deltaTotal = deltaTimestamp.microseconds + 1000000*deltaTimestamp.seconds
-        deltaPosX = self.historyPos[self.historyConfirmed[-1]].x-self.historyPos[self.historyConfirmed[-1]-1].x
-        deltaPosY = self.historyPos[self.historyConfirmed[-1]].y-self.historyPos[self.historyConfirmed[-1]-1].y
-        
-        for i in range(self.historyConfirmed[-2], self.historyConfirmed[-1]):
-            deltaTimestamp = self.historyTime[i]-self.historyTime[self.historyConfirmed[-2]]
-            deltaTime = deltaTimestamp.microseconds + 1000000*deltaTimestamp.seconds
-            fracTime = 1.0 * deltaTime / deltaTotal
-            self.historyPosCor[i].x = self.historyPos[i].x+fracTime*deltaPosX
-            self.historyPosCor[i].y = self.historyPos[i].y+fracTime*deltaPosY
+        if len(self.historyConfirmed)>1:
+            deltaTimestamp = self.historyTime[self.historyConfirmed[-1]]-self.historyTime[self.historyConfirmed[-2]]
+            deltaTotal = deltaTimestamp.microseconds + 1000000*deltaTimestamp.seconds
+            deltaPosX = self.historyPos[self.historyConfirmed[-1]].x-self.historyPos[self.historyConfirmed[-1]-1].x
+            deltaPosY = self.historyPos[self.historyConfirmed[-1]].y-self.historyPos[self.historyConfirmed[-1]-1].y
+            
+            for i in range(self.historyConfirmed[-2], self.historyConfirmed[-1]):
+                deltaTimestamp = self.historyTime[i]-self.historyTime[self.historyConfirmed[-2]]
+                deltaTime = deltaTimestamp.microseconds + 1000000*deltaTimestamp.seconds
+                fracTime = 1.0 * deltaTime / deltaTotal
+                self.historyPosCor[i].x = self.historyPos[i].x+fracTime*deltaPosX
+                self.historyPosCor[i].y = self.historyPos[i].y+fracTime*deltaPosY
+        else:
+            deltaPosX = self.historyPos[self.historyConfirmed[-1]].x-self.historyPos[self.historyConfirmed[-1]-1].x
+            deltaPosY = self.historyPos[self.historyConfirmed[-1]].y-self.historyPos[self.historyConfirmed[-1]-1].y
+            
+            for i in range(0, self.historyConfirmed[-1]):
+                self.historyPosCor[i].x = self.historyPos[i].x+deltaPosX
+                self.historyPosCor[i].y = self.historyPos[i].y+deltaPosY
         
 
     # TODO implement

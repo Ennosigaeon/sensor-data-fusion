@@ -133,3 +133,10 @@ class Drone(ps_drone.Drone):
         else:
             self.stop()
             print " drone stopped"
+
+    def orientation(self, navData):
+        original_yaw = navData["demo"][2][2]
+        print "original_yaw: " + str(original_yaw)      
+        yaw = 180 + original_yaw
+        return (yaw)
+

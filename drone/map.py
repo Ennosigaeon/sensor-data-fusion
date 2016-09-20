@@ -49,3 +49,6 @@ class Map:
         :return: A list of all landmarks
         """
         return self.landmarks.values()
+
+    def determinePosition(self, landmarks):
+        pass

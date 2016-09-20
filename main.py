@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 
 from drone import deadReckoning, detectMarker, extDrone
 from drone.config import Config
+from drone.map import Map
 
-# Get calibration data for configuration and output path for video
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--calibration", action="store", type=str, required=True, help="Path to calibration file")
 parser.add_argument("-o", "--output", action="store", type=str, required=True,
@@ -29,8 +29,8 @@ output = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'XVID'), config.fp
 # Initialize drone and deadReckoning
 drone = extDrone.Drone()
 drone.startup()
-# TODO: Initialize deadReckoning with y-axis pointing north
-DR = deadReckoning.DeadReckoning(drone)
+DR = deadReckoning.DeadReckoning()
+DR.setPhiToZero(drone)
 DR.initRTPlot()
 markerDetector = detectMarker.MarkerDetector(config)
 
@@ -49,7 +49,7 @@ drone.startVideo()
 drone.showVideo()
 
 # TODO: Implement map
-
+map = Map()
 
 # Drone execution loop
 while (1):
@@ -61,10 +61,12 @@ while (1):
 
     # Marker detection
     image = drone.getNextVideoFrame()
-    markerDetector.detect(image)
+    markers = markerDetector.detect(image)
     output.write(image)
 
-    # TODO: Determine position on map
+    if (len(markers) > 0):
+        position = map.determinePosition(markers)
+        DR.updateConfPos(position.x, position.y)
 
     # TODO: Implement autonomous flying (fly to marker or random walk)
 

@@ -62,8 +62,6 @@ class MarkerDetector:
         # distance in world coordinates
         rotM = cv2.Rodrigues(rvec)[0]
         cameraPosition = -rotM.dot(tvec.T).flatten()
-        # TODO y position is distorted. maybe calibration error?
-        # cameraPosition[1] -= self.config.markerLength
         self.distances[arucoId] += cameraPosition.T
 
         if (self.frameCount[arucoId] == 0):

@@ -6,12 +6,13 @@ import datetime
 import math
 import os
 import sys
+
 from time import sleep
 
 import matplotlib.pyplot as plt
 
-import extDrone
-from drone.plot import RealTimePlot
+from extDrone_dummy import Drone
+from plot import RealTimePlot
 from map import Position
 
 
@@ -35,12 +36,15 @@ class DeadReckoning:
         self.phio = 0
         self.rtp = RealTimePlot()
 
-    def setPhiToZero(self, phi):
+    def setPhiToZero(self, drone):
+        self.phio = drone.navData["demo"][2][2]
+        
+    def setPhioToValue(self, phi):
         self.phio = phi
 
     def updatePos(self, speed, phid):
         # adjusting angle (phid is in degree, phi is in radian)
-        phi = ((phid - self.phio) / 180) * math.pi
+        phi = (((phid - self.phio)%360) / 180) * math.pi
 
         # measuring total time and time since last datapoint
         time = datetime.datetime.now()
@@ -110,17 +114,20 @@ class DeadReckoning:
 
 
 if (__name__ == "__main__"):
-    drone = extDrone.Drone()
-    drone.startup()
+    drone = Drone()
+    drone.defaultInit()
+    
     DR = DeadReckoning(Position(0, 0))
-    DR.setPhiToZero(drone)
-    DR.initRTPlot()
-
+    
+    #Change if yaw is wrong
+    #DR.setPhiToZero(drone.getOrientation())
+    
     while (1):
         navData = drone.getNextDataSet()
+        
+        DR.updatePos(drone.getSpeed(navData), drone.getOrientation(navData))
 
-        DR.updatePos(drone.getSpeed(), drone.getOrientation())
-
+        sleep(1)
         key = drone.getKey()
         if key:
             drone.simplePiloting(key)
@@ -128,10 +135,11 @@ if (__name__ == "__main__"):
                 print "Program stopped"
                 drone.failSafeStopDrone()
 
-                minFree = 1
-                while os.path.lexists("./data/rawdata" + str(minFree) + ".txt"): minFree += 1
-                with open("./data/rawdata" + str(minFree) + ".txt", "w") as raw_file:
-                    DR.storeRaw(raw_file)
+                #TODO: store flight data
+                #minFree = 1
+                #while os.path.lexists("./data/rawdata" + str(minFree) + ".txt"): minFree += 1
+                #with open("./data/rawdata" + str(minFree) + ".txt", "w") as raw_file:
+                #    DR.storeRaw(raw_file)
 
                 plt.pause(5)
                 sys.exit()

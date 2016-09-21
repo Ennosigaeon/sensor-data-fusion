@@ -23,11 +23,11 @@ class Drone(ps_drone.Drone):
         Extended startup procedure.
         """
         self.useDemoMode(True)
-        # self.getNDpackage(["demo"])
-        # time.sleep(0.5)
-        # self.trim()
-        # time.sleep(1)
-        # self.setSpeed(0.05)
+        self.getNDpackage(["demo"])
+        time.sleep(0.5)
+        self.trim()
+        time.sleep(1)
+        self.setSpeed(0.05)
 
     def reset(self):
         """
@@ -143,12 +143,15 @@ class Drone(ps_drone.Drone):
             self.stop()
             print " drone stopped"
 
-    def getSpeed(self):
+    def getSpeed(self, navData = None):
         """
         Returns the current velocity of the drone.
         :return: Array with three values for velocity in three directions.
         """
-        return self.NavData["demo"][4]
+        if navData == None:
+            return self.NavData["demo"][4]
+        else:
+            return navData["demo"][4]
 
     def getOrientation(self):
         """
@@ -156,4 +159,7 @@ class Drone(ps_drone.Drone):
         :return: Current orientation
         """
         # Add 180 to make 0 degree == north
-        return self.NavData["demo"][2][2] + 180
+        if navData == None:
+            return self.NavData["demo"][2][2] + 180
+        else:
+            return navData["demo"][2][2] + 180

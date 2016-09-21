@@ -29,6 +29,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import time
 
 if os.name == 'posix':	import termios, fcntl	# for getKey(), ToDo: Reprogram for Windows
 
@@ -2060,7 +2061,6 @@ if __name__ == "__main__":
 ### Here you can write your first test-codes and play around with them
 ###
 
-	import time
 	import ps_drone
 
 	drone = ps_drone.Drone()								# Start using drone

@@ -22,6 +22,8 @@ markerDetector = detectMarker.MarkerDetector(config)
 
 drone = extDrone.Drone()
 drone.startup()
+drone.reset()
+drone.defaultInit()
 
 drone.setConfigAllID()
 drone.sdVideo()

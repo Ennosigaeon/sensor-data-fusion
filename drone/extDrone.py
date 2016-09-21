@@ -15,18 +15,16 @@ class Drone(ps_drone.Drone):
         self.lastNDC = self.NavDataCount
         self.landed = True
 
-    def startup(self):
+    def defaultInit(self):
         """
         Extended startup procedure.
         """
-        super(Drone, self).startup()
-        self.reset()
         self.useDemoMode(True)
-        self.getNDpackage(["demo"])
-        time.sleep(0.5)
-        self.trim()
-        time.sleep(1)
-        self.setSpeed(0.05)
+        # self.getNDpackage(["demo"])
+        # time.sleep(0.5)
+        # self.trim()
+        # time.sleep(1)
+        # self.setSpeed(0.05)
 
     def reset(self):
         """
@@ -42,9 +40,6 @@ class Drone(ps_drone.Drone):
         Waits for the next video frame. If no camera is activated, None will be returned.
         :return: The next video frame as a numpy array
         """
-        # TODO check if VideoReady really means that one camera is active
-        if (not self.VideoReady):
-            return None
         # Wait for next video frame
         while self.lastIMC == self.VideoImageCount:
             time.sleep(0.01)
@@ -61,7 +56,7 @@ class Drone(ps_drone.Drone):
         Calls ps_drone.Drone.frontCam(). Also sets data for toggleCam().
         :param args: Arguments for frontCam()
         """
-        super(Drone, self).frontCam(args)
+        super(Drone, self).frontCam(*args)
         self.groundCamEnabled = False
 
     def groundCam(self, *args):
@@ -69,7 +64,7 @@ class Drone(ps_drone.Drone):
         Calls ps_drone.Drone.groundCam(). Also sets data for toggleCam().
         :param args: Arguments for groundCam()
         """
-        super(Drone, self).groundCam(args)
+        super(Drone, self).groundCam(*args)
         self.groundCamEnabled = True
 
     def toggleCamera(self):
@@ -77,7 +72,10 @@ class Drone(ps_drone.Drone):
         Toggles the enabled camera.
         """
         self.groundCamEnabled = not self.groundCamEnabled
-        self.groundCam(self.groundCamEnabled)
+        if (self.groundCamEnabled):
+            self.groundCam()
+        else:
+            self.frontCam()
 
     def failSafeStopDrone(self):
         self.stop()

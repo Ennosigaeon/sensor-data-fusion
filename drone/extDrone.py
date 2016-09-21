@@ -1,5 +1,7 @@
 import time
 
+import cv2
+
 import ps_drone
 
 
@@ -14,6 +16,7 @@ class Drone(ps_drone.Drone):
         self.lastIMC = self.VideoImageCount
         self.lastNDC = self.NavDataCount
         self.landed = True
+        self.cap = None
 
     def defaultInit(self):
         """
@@ -35,21 +38,29 @@ class Drone(ps_drone.Drone):
             time.sleep(0.1)
         print "Battery: " + str(self.getBattery()[0]) + "% " + str(self.getBattery()[1])
 
+    def getNextDataSet(self):
+        while self.NavDataCount == self.lastNDC: time.sleep(0.001)  # waiting for new datapoint
+        self.lastNDC = self.NavDataCount
+        return self.NavData
+
+    # noinspection PyArgumentList
+    def startCamera(self, fps):
+        self.setConfigAllID()
+        self.sdVideo()
+        self.groundCam()
+        self.videoFPS(fps)
+        self.cap = cv2.VideoCapture('tcp://192.168.1.1:5555')
+
     def getNextVideoFrame(self):
         """
         Waits for the next video frame. If no camera is activated, None will be returned.
         :return: The next video frame as a numpy array
         """
         # Wait for next video frame
-        while self.lastIMC == self.VideoImageCount:
-            time.sleep(0.01)
-        self.lastIMC = self.VideoImageCount
-        return self.VideoImage
-
-    def getNextDataSet(self):
-        while self.NavDataCount == self.lastNDC: time.sleep(0.001)  # waiting for new datapoint
-        self.lastNDC = self.NavDataCount
-        return self.NavData
+        if (self.cap is None):
+            raise ValueError("Video stream not started yet")
+        ret, frame = self.cap.read()
+        return frame
 
     def frontCam(self, *args):
         """

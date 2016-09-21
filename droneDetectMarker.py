@@ -25,17 +25,7 @@ drone.startup()
 drone.reset()
 drone.defaultInit()
 
-drone.setConfigAllID()
-drone.sdVideo()
-drone.groundCam()
-drone.videoFPS(config.fps)
-
-CDC = drone.ConfigDataCount
-while CDC == drone.ConfigDataCount:
-    time.sleep(0.001)
-
-drone.startVideo()
-drone.showVideo()
+drone.startCamera(config.fps)
 
 print "Press ESC to stop recording"
 print "Press space to switch cameras"
@@ -44,11 +34,12 @@ while True:
     image = drone.getNextVideoFrame()
     markerDetector.detect(image)
     output.write(image)
+    cv2.imshow("Image", image)
 
-    key = drone.getKey()
-    if (key == " "):
+    key = cv2.waitKey(1) & 0xFF
+    if (key == ord(" ")):
         drone.toggleCamera()
-    elif (key and ord(key) == 27):
+    elif (key == 27):
         break
 
 output.release()

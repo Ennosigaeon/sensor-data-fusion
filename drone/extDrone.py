@@ -143,23 +143,23 @@ class Drone(ps_drone.Drone):
             self.stop()
             print " drone stopped"
 
-    def getSpeed(self, navData = None):
+    def getSpeed(self, navData=None):
         """
         Returns the current velocity of the drone.
         :return: Array with three values for velocity in three directions.
         """
-        if navData == None:
+        if navData is None:
             return self.NavData["demo"][4]
         else:
             return navData["demo"][4]
 
-    def getOrientation(self):
+    def getOrientation(self, navData=None):
         """
         Returns the current orientation of the drone.
         :return: Current orientation
         """
         # Add 180 to make 0 degree == north
-        if navData == None:
+        if navData is None:
             return self.NavData["demo"][2][2] + 180
         else:
             return navData["demo"][2][2] + 180

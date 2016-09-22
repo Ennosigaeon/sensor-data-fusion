@@ -24,9 +24,7 @@ class Drone(ps_drone.Drone):
         """
         self.useDemoMode(True)
         self.getNDpackage(["demo"])
-        time.sleep(0.5)
         self.trim()
-        time.sleep(1)
         self.setSpeed(0.05)
 
     def reset(self):

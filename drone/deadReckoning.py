@@ -11,7 +11,7 @@ from time import sleep
 
 import matplotlib.pyplot as plt
 
-from extDrone_dummy import Drone
+from extDrone import Drone
 from plot import RealTimePlot
 from map import Position
 
@@ -94,13 +94,6 @@ class DeadReckoning:
                 self.historyPosCor[i].x = self.historyPos[i].x + deltaPosX
                 self.historyPosCor[i].y = self.historyPos[i].y + deltaPosY
 
-    # TODO implement
-    def storeRaw(self, file):
-        pass
-
-    def loadRaw(self):
-        pass
-
     # noinspection PyMethodMayBeStatic
     def initRTPlot(self):
         plt.axis([-4, 4, -4, 4])
@@ -115,6 +108,8 @@ class DeadReckoning:
 
 if (__name__ == "__main__"):
     drone = Drone()
+    drone.startup()
+    drone.reset()
     drone.defaultInit()
     
     DR = DeadReckoning(Position(0, 0))
@@ -134,12 +129,6 @@ if (__name__ == "__main__"):
             if (key == '0'):
                 print "Program stopped"
                 drone.failSafeStopDrone()
-
-                #TODO: store flight data
-                #minFree = 1
-                #while os.path.lexists("./data/rawdata" + str(minFree) + ".txt"): minFree += 1
-                #with open("./data/rawdata" + str(minFree) + ".txt", "w") as raw_file:
-                #    DR.storeRaw(raw_file)
 
                 plt.pause(5)
                 sys.exit()

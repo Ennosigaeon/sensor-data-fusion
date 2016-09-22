@@ -13,8 +13,8 @@ class Position:
         self.phi = phi
 
     def updatePosition(self, vx, vy, phi, deltaTime):
-        x = self.x + (math.cos(phi) * vx - math.sin(phi) * vy) * deltaTime
-        y = self.y - (math.cos(phi) * vy + math.sin(phi) * vx) * deltaTime
+        x = self.x + (math.cos(phi) * vx - math.sin(phi) * vy) * deltaTime / 1000
+        y = self.y - (math.cos(phi) * vy + math.sin(phi) * vx) * deltaTime / 1000
         return Position(x, y, 0, phi)
 
 

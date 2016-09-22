@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 
 import argparse
-import sys
-import time
 
 import cv2
-import matplotlib.pyplot as plt
 
 from drone import deadReckoning, detectMarker, extDrone
 from drone.capture import Capture

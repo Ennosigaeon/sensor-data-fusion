@@ -30,7 +30,6 @@ output = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'XVID'), config.fp
 drone = extDrone.Drone()
 drone.startup()
 DR = deadReckoning.DeadReckoning(Position(0, 0))
-DR.setPhiToZero(drone.getOrientation())
 DR.initRTPlot()
 markerDetector = detectMarker.MarkerDetector(config)
 

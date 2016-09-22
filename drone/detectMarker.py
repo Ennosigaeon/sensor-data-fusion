@@ -65,7 +65,7 @@ class MarkerDetector:
         self.distances[arucoId] += cameraPosition.T
 
         if (self.frameCount[arucoId] == 0):
-            res = (arucoId, self.distances[arucoId] / self.filterFrames * 100)
+            res = [int(arucoId), (self.distances[arucoId] / self.filterFrames).tolist()]
             del self.distances[arucoId]
             del self.missingFrames[arucoId]
             del self.frameCount[arucoId]
@@ -114,8 +114,8 @@ if (__name__ == "__main__"):
         ret, frame = input.read()
         markerDetector.highlightCameraCenter(frame)
         markers = markerDetector.detect(frame)
-        for arucoId, distance in markers:
-            print "Detected marker {} at {}".format(arucoId, distance)
+        for marker in markers:
+            print "Detected marker {} at {}".format(marker[0], marker[1])
 
         if (output is not None):
             output.write(frame)

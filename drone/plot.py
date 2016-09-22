@@ -10,12 +10,12 @@ class RealTimePlot:
         self.plt = plt.figure()
         self.ax = self.plt.add_subplot(111)
 
-        self.ax.axis([-1, 1, -1, 1])
+        self.ax.axis([-5, 5, -5, 5])
         plt.ion()
 
     def drawLine(self, point1, point2, color="b"):
         self.ax.plot([point1[0], point2[0]], [point1[1], point2[1]], color=color)
-        self.updateBorders(point1, point2)
+        # self.updateBorders(point1, point2)
         plt.pause(0.05)
 
     def updateBorders(self, point1, point2):

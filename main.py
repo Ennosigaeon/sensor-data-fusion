@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 
-# TODO: test this code
-
 import argparse
-import os
 import sys
 import time
 
@@ -11,6 +8,7 @@ import cv2
 import matplotlib.pyplot as plt
 
 from drone import deadReckoning, detectMarker, extDrone
+from drone.capture import Capture
 from drone.config import Config
 from drone.map import Map, Landmark, Position
 
@@ -26,28 +24,6 @@ config.fps = 15.0
 output = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'XVID'), config.fps,
                          (config.imageWidth, config.imageHeight))
 
-# Initialize drone and deadReckoning
-drone = extDrone.Drone()
-drone.startup()
-DR = deadReckoning.DeadReckoning(Position(0, 0))
-DR.setPhiToZero(drone.getOrientation())
-DR.initRTPlot()
-markerDetector = detectMarker.MarkerDetector(config)
-
-# Start camera
-drone.setConfigAllID()
-drone.sdVideo()
-drone.groundCam()
-drone.videoFPS(config.fps)
-
-CDC = drone.ConfigDataCount
-while CDC == drone.ConfigDataCount:
-    time.sleep(0.001)
-
-# Show video
-drone.startVideo()
-drone.showVideo()
-
 map = Map()
 map.addLandmark(Landmark(0, Position(0, 0)))
 map.addLandmark(Landmark(1, Position(1, 0)))
@@ -55,46 +31,52 @@ map.addLandmark(Landmark(2, Position(1, 2)))
 map.addLandmark(Landmark(3, Position(0, 2)))
 map.addLandmark(Landmark(4, Position(0.5, 1)))
 
+# Initialize drone and deadReckoning
+drone = extDrone.Drone()
+drone.startup()
+drone.reset()
+drone.defaultInit()
+drone.startCamera(config.fps)
+
+DR = deadReckoning.DeadReckoning(Position(0, 0))
+markerDetector = detectMarker.MarkerDetector(config)
+capture = Capture()
+
 # Drone execution loop
 while (1):
     # Wait for new NavData and update deadReckoning
     navData = drone.getNextDataSet()
-
-    DR.updatePos(drone.getSpeed(), drone.getOrientation())
+    if (navData):
+        DR.updatePos(drone.getSpeed(navData), drone.getOrientation(navData))
+        capture.addRawSensorData(drone.getSpeed(navData), drone.getOrientation(navData))
 
     # Marker detection
     image = drone.getNextVideoFrame()
     markers = markerDetector.detect(image)
     output.write(image)
+    cv2.imshow("Image", image)
+    capture.addMarker(markers)
 
     if (len(markers) > 0):
         print "Detected marker/s {}".format(markers)
         position = map.determinePosition(markers)
-        DR.updateConfPos(position)
+        # DR.updateConfPos(position)
 
     # TODO: Implement autonomous flying (fly to marker or random walk)
 
     # Control input
-    key = drone.getKey()
+    key = cv2.waitKey(1) & 0xFF
+    key = None if key > 127 else chr(key)
     if key:
+        print key
         drone.simplePiloting(key)
         if (key == '0'):
             break
-    else:
-        time.sleep(0.01)
 
 # Stop drone
 print "Program stopped"
 drone.failSafeStopDrone()
+capture.store("test_flight.json")
 
 # Release output
 output.release()
-
-# Store raw data
-minFree = 1
-while os.path.lexists("./data/rawdata" + str(minFree) + ".txt"): minFree += 1
-with open("./data/rawdata" + str(minFree) + ".txt", "w") as raw_file:
-    DR.storeRaw(raw_file)
-
-plt.pause(5)
-sys.exit()

@@ -57,7 +57,9 @@ class Map:
         """
         x = 0.0
         y = 0.0
-        for arucoId, distance in markers:
+        for marker in markers:
+            arucoId = marker[0]
+            distance = marker[1]
             if (arucoId not in self.landmarks):
                 raise ValueError("Invalid marker id {}".format(arucoId))
             x += self.landmarks[arucoId].position.x - distance[0]

@@ -25,29 +25,35 @@ def createFolder(path):
 
 
 class DeadReckoning:
-    def __init__(self, position):
+    def __init__(self, position, time=None):
         self.pos = position
         self.historyPos = [position]
         self.historyPosCor = [position]
         self.historyTime = [datetime.datetime.now()]
         self.historyConfirmed = []
         self.timeStart = datetime.datetime.now()
-        self.lastTimestamp = datetime.datetime.now()
+        if (time):
+            self.lastTimestamp = time
+        else:
+            self.lastTimestamp = datetime.datetime.now()
         self.phio = 0
         self.rtp = RealTimePlot()
 
     def setPhiToZero(self, drone):
         self.phio = drone.navData["demo"][2][2]
-        
+
     def setPhioToValue(self, phi):
         self.phio = phi
 
-    def updatePos(self, speed, phid):
+    def updatePos(self, speed, phid, timestamp=None):
         # adjusting angle (phid is in degree, phi is in radian)
-        phi = (((phid - self.phio)%360) / 180) * math.pi
+        phi = (((phid - self.phio) % 360) / 180) * math.pi
 
         # measuring total time and time since last datapoint
-        time = datetime.datetime.now()
+        if (timestamp):
+            time = timestamp
+        else:
+            time = datetime.datetime.now()
         deltaTime = (time - self.lastTimestamp).total_seconds()
         self.lastTimestamp = time
 
@@ -58,12 +64,13 @@ class DeadReckoning:
         self.historyPosCor.append(self.pos)
         self.historyTime.append(time)
 
-        histPos = self.historyPos[-2]
-        self.rtp.drawLine([histPos.x, histPos.y], [self.pos.x, self.pos.y], "b")
+        if (timestamp):
+            histPos = self.historyPos[-2]
+            self.rtp.drawLine([histPos.x, histPos.y], [self.pos.x, self.pos.y], "b")
 
     def updateConfPos(self, position):
         time = datetime.datetime.now()
-        self.rtp.drawLine([position.x, position.y], [self.pos.x, self.pos.y], "r")
+        # self.rtp.drawLine([position.x, position.y], [self.pos.x, self.pos.y], "r")
 
         # TODO use Kalman filter
         self.pos = position
@@ -94,12 +101,6 @@ class DeadReckoning:
                 self.historyPosCor[i].x = self.historyPos[i].x + deltaPosX
                 self.historyPosCor[i].y = self.historyPos[i].y + deltaPosY
 
-    # noinspection PyMethodMayBeStatic
-    def initRTPlot(self):
-        plt.axis([-4, 4, -4, 4])
-        plt.ion()
-        plt.pause(0.05)
-
     def drawCorrectedPath(self):
         for i in range(len(self.historyPosCor) - 1):
             self.rtp.drawLine([self.historyPosCor[i].x, self.historyPosCor[i].y],
@@ -111,15 +112,15 @@ if (__name__ == "__main__"):
     drone.startup()
     drone.reset()
     drone.defaultInit()
-    
+
     DR = DeadReckoning(Position(0, 0))
-    
-    #Change if yaw is wrong
-    #DR.setPhiToZero(drone.getOrientation())
-    
+
+    # Change if yaw is wrong
+    # DR.setPhiToZero(drone.getOrientation())
+
     while (1):
         navData = drone.getNextDataSet()
-        
+
         DR.updatePos(drone.getSpeed(navData), drone.getOrientation(navData))
 
         sleep(1)

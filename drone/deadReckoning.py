@@ -32,10 +32,9 @@ class DeadReckoning:
         self.historyTime = [datetime.datetime.now()]
         self.historyConfirmed = []
         self.timeStart = datetime.datetime.now()
-        if (time):
-            self.lastTimestamp = time
-        else:
-            self.lastTimestamp = datetime.datetime.now()
+        if (time is None):
+            time = datetime.datetime.now()
+        self.lastTimestamp = time
         self.phio = 0
         self.rtp = RealTimePlot()
 
@@ -45,14 +44,12 @@ class DeadReckoning:
     def setPhioToValue(self, phi):
         self.phio = phi
 
-    def updatePos(self, speed, phid, timestamp=None):
+    def updatePos(self, speed, phid, time=None):
         # adjusting angle (phid is in degree, phi is in radian)
         phi = (((phid - self.phio) % 360) / 180) * math.pi
 
         # measuring total time and time since last datapoint
-        if (timestamp):
-            time = timestamp
-        else:
+        if (time is None):
             time = datetime.datetime.now()
         deltaTime = (time - self.lastTimestamp).total_seconds()
         self.lastTimestamp = time
@@ -64,11 +61,14 @@ class DeadReckoning:
         self.historyPosCor.append(self.pos)
         self.historyTime.append(time)
 
-        self.rtp.drawPoint(self.pos.x, self.pos.y, "b")
+        self.rtp.addPoint(self.pos.x, self.pos.y, "b")
+        self.rtp.plot()
 
-    def updateConfPos(self, position):
-        time = datetime.datetime.now()
-        # self.rtp.drawLine([position.x, position.y], [self.pos.x, self.pos.y], "r")
+    def updateConfPos(self, position, time=None):
+        self.rtp.addPoint(position.x, position.y, "r")
+        self.rtp.plot()
+        if (time is None):
+            time = datetime.datetime.now()
 
         # TODO use Kalman filter
         self.pos = position
@@ -100,9 +100,9 @@ class DeadReckoning:
                 self.historyPosCor[i].y = self.historyPos[i].y + deltaPosY
 
     def drawCorrectedPath(self):
-        for i in range(len(self.historyPosCor) - 1):
-            self.rtp.drawLine([self.historyPosCor[i].x, self.historyPosCor[i].y],
-                              [self.historyPosCor[i + 1].x, self.historyPosCor[i + 1].y], "r")
+        for position in self.historyPosCor:
+            self.rtp.addPoint(position.x, position.y, "g")
+        self.rtp.plot()
 
 
 if (__name__ == "__main__"):

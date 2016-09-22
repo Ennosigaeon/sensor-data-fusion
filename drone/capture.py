@@ -1,11 +1,11 @@
 import json
-import time
 from datetime import datetime
+from time import sleep
 
 import pytz
 
 from drone.deadReckoning import DeadReckoning
-from drone.map import Position
+from drone.map import Position, Map, Landmark
 
 epoch = datetime.utcfromtimestamp(0)
 
@@ -57,28 +57,39 @@ class Capture:
 
     def playbackMarker(self):
         if (self.sensorIndex + 1 >= len(self.rawSensorData) or len(self.markers) <= 0):
-            return None
+            return (None, None)
 
         if (self.rawSensorData[self.sensorIndex + 1]["time"] > self.markers[-1]["time"]):
-            return self.markers.pop()["markers"]
-        return None
+            m = self.markers.pop()
+            return (m["markers"], datetime.fromtimestamp(m["time"] / 1000, pytz.utc))
+        return (None, None)
 
 
 if (__name__ == "__main__"):
+    map = Map()
+    map.addLandmark(Landmark(0, Position(0, 0)))
+    map.addLandmark(Landmark(1, Position(1, 0)))
+    map.addLandmark(Landmark(2, Position(1, 2)))
+    map.addLandmark(Landmark(3, Position(0, 2)))
+    map.addLandmark(Landmark(4, Position(0.5, 1)))
+
     capture = Capture()
-    capture.load("../test_flight.json")
+    capture.load("../../Contrib/test_flight.json")
     # TODO remove / 1000. Only correct for first record.
     DR = DeadReckoning(Position(0, 0), datetime.fromtimestamp(capture.rawSensorData[0]["time"] / 1000, pytz.utc))
 
     while (True):
         sensor = capture.playbackSensor()
-        if (sensor):
-            DR.updatePos(sensor[0], sensor[1], sensor[2])
-            print sensor
-
-            markers = capture.playbackMarker()
-            if (markers):
-                print markers
-        else:
+        if (not sensor):
             break
-    time.sleep(10)
+        DR.updatePos(sensor[0], sensor[1], sensor[2])
+        print sensor
+
+        markers, time = capture.playbackMarker()
+        if (markers):
+            position = map.determinePosition(markers)
+            DR.updateConfPos(position, time)
+            print markers
+        sleep(0.01)
+    DR.drawCorrectedPath()
+    sleep(10)

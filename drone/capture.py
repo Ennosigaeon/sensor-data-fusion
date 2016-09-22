@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+import matplotlib.pyplot as plt
 
 import pytz
 
@@ -66,6 +67,7 @@ class Capture:
 if (__name__ == "__main__"):
     capture = Capture()
     capture.load("../test_flight.json")
+    # TODO remove / 1000. Only correct for first record.
     DR = DeadReckoning(Position(0, 0), datetime.fromtimestamp(capture.rawSensorData[0]["time"] / 1000, pytz.utc))
 
     while (True):
@@ -79,3 +81,5 @@ if (__name__ == "__main__"):
                 print markers
         else:
             break
+
+    plt.pause(10)

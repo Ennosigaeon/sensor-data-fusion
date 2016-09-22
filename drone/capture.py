@@ -1,6 +1,6 @@
 import json
+import time
 from datetime import datetime
-import matplotlib.pyplot as plt
 
 import pytz
 
@@ -81,5 +81,4 @@ if (__name__ == "__main__"):
                 print markers
         else:
             break
-
-    plt.pause(10)
+    time.sleep(10)

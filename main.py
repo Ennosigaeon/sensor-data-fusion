@@ -39,6 +39,9 @@ DR = deadReckoning.DeadReckoning(Position(0, 0))
 markerDetector = detectMarker.MarkerDetector(config)
 capture = Capture()
 
+navData = drone.getNextDataSet()
+DR.setPhioToValue(drone.getOrientation(navData))
+
 # Drone execution loop
 while (1):
     # Wait for new NavData and update deadReckoning

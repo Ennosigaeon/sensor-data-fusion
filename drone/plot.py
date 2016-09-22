@@ -5,6 +5,8 @@ class RealTimePlot:
     def __init__(self):
         self.maxBorders = [4] * 2
         self.minBorders = [-4] * 2
+        self.x = []
+        self.y = []
         self.plt = plt.figure()
         self.ax = self.plt.add_subplot(111)
 
@@ -13,10 +15,16 @@ class RealTimePlot:
         plt.show(False)
         plt.draw()
 
-    def drawLine(self, point1, point2, color="b"):
-        self.ax.plot([point1[0], point2[0]], [point1[1], point2[1]], color=color)
-        self.updateBorders(point1, point2)
-        self.plt.canvas.draw()
+        self.background = self.plt.canvas.copy_from_bbox(self.ax.bbox)
+
+    def drawPoint(self, x, y, color="b"):
+        self.x.append(x)
+        self.y.append(y)
+
+        points = self.ax.plot(self.x, self.y, color)[0]
+        self.plt.canvas.restore_region(self.background)
+        self.ax.draw_artist(points)
+        self.plt.canvas.blit(self.ax.bbox)
 
     def updateBorders(self, point1, point2):
         if (all((self.minBorders[0] <= point1[0], point2[0] <= self.maxBorders[0])) and

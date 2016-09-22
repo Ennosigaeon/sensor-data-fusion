@@ -64,8 +64,7 @@ class DeadReckoning:
         self.historyPosCor.append(self.pos)
         self.historyTime.append(time)
 
-        histPos = self.historyPos[-2]
-        self.rtp.drawLine([histPos.x, histPos.y], [self.pos.x, self.pos.y], "b")
+        self.rtp.drawPoint(self.pos.x, self.pos.y, "b")
 
     def updateConfPos(self, position):
         time = datetime.datetime.now()

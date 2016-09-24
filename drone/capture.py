@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 from time import sleep
 
+import matplotlib.pyplot as plt
 import pytz
 
 from drone.deadReckoning import DeadReckoning
@@ -68,10 +69,10 @@ class Capture:
 if (__name__ == "__main__"):
     map = Map()
     map.addLandmark(Landmark(0, Position(0, 0)))
-    map.addLandmark(Landmark(1, Position(1, 0)))
-    map.addLandmark(Landmark(2, Position(1, 2)))
-    map.addLandmark(Landmark(3, Position(0, 2)))
-    map.addLandmark(Landmark(4, Position(0.5, 1)))
+    map.addLandmark(Landmark(1, Position(0, 1)))
+    map.addLandmark(Landmark(2, Position(2, 1)))
+    map.addLandmark(Landmark(3, Position(2, 0)))
+    map.addLandmark(Landmark(4, Position(1, 0.5)))
 
     capture = Capture()
     capture.load("../../Contrib/test_flight.json")
@@ -92,4 +93,4 @@ if (__name__ == "__main__"):
             print markers
         sleep(0.01)
     DR.drawCorrectedPath()
-    sleep(10)
+    plt.pause(10)

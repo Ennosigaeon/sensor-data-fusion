@@ -159,6 +159,6 @@ class Drone(ps_drone.Drone):
         """
         # Add 180 to make 0 degree == north
         if navData is None:
-            return self.NavData["demo"][2][2]
+            return -self.NavData["demo"][2][2]
         else:
-            return navData["demo"][2][2]
+            return -navData["demo"][2][2]

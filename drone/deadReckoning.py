@@ -37,11 +37,13 @@ class DeadReckoning:
         self.lastTimestamp = time
         self.phio = 0
         self.rtp = RealTimePlot()
+        self.rtp.addPoint(self.pos.x, self.pos.y, "b")
 
     def setPhiToZero(self, drone):
         self.phio = drone.navData["demo"][2][2]
 
     def setPhioToValue(self, phi):
+        print "Setting phio to {}".format(phi)
         self.phio = phi
 
     def updatePos(self, speed, phid, time=None):

@@ -23,11 +23,10 @@ output = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'XVID'), config.fp
 
 map = Map()
 map.addLandmark(Landmark(0, Position(0, 0)))
-map.addLandmark(Landmark(1, Position(1, 0)))
-map.addLandmark(Landmark(2, Position(1, 2)))
-map.addLandmark(Landmark(3, Position(0, 2)))
-map.addLandmark(Landmark(4, Position(0.5, 1)))
-
+map.addLandmark(Landmark(1, Position(0, 1)))
+map.addLandmark(Landmark(2, Position(2, 1)))
+map.addLandmark(Landmark(3, Position(2, 0)))
+map.addLandmark(Landmark(4, Position(1, 0.5)))
 # Initialize drone and deadReckoning
 drone = extDrone.Drone()
 drone.startup()
@@ -40,7 +39,6 @@ markerDetector = detectMarker.MarkerDetector(config)
 capture = Capture()
 
 navData = drone.getNextDataSet()
-DR.setPhioToValue(drone.getOrientation(navData))
 
 # Drone execution loop
 while (1):
@@ -69,6 +67,9 @@ while (1):
     key = None if key > 127 else chr(key)
     if key:
         print key
+        if (key == ' '):
+            DR.setPhioToValue(drone.getOrientation(navData))
+
         drone.simplePiloting(key)
         if (key == '0'):
             break

@@ -158,7 +158,7 @@ class Drone(ps_drone.Drone):
         :return: Current orientation
         """
         # Add 180 to make 0 degree == north
-        if navData is None:
-            return -self.NavData["demo"][2][2]
-        else:
-            return -navData["demo"][2][2]
+        v = self.NavData["demo"][2][2]
+        if navData is not None:
+            v = navData["demo"][2][2]
+        return -(v + 0.00047 * self.NavDataCount)

@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 
 class RealTimePlot:
     def __init__(self):
-        self.maxBorders = [4] * 2
-        self.minBorders = [-4] * 2
+        self.maxBorders = [2] * 2
+        self.minBorders = [-2] * 2
         self.x = {'b': [], 'r': [], 'g': []}
         self.y = {'b': [], 'r': [], 'g': []}
         self.plt = plt.figure()

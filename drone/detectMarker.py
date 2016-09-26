@@ -9,7 +9,7 @@ import config
 
 # noinspection PyMethodMayBeStatic,PyShadowingNames
 class MarkerDetector:
-    def __init__(self, config, filterFrames=10, dictionary=aruco.getPredefinedDictionary(aruco.DICT_4X4_50)):
+    def __init__(self, config, filterFrames=5, dictionary=aruco.getPredefinedDictionary(aruco.DICT_4X4_50)):
         self.config = config
         self.filterFrames = filterFrames
         self.dictionary = dictionary
@@ -65,7 +65,7 @@ class MarkerDetector:
         self.distances[arucoId] += cameraPosition.T
 
         if (self.frameCount[arucoId] == 0):
-            res = [int(arucoId), (self.distances[arucoId] / self.filterFrames).tolist()]
+            res = [int(arucoId), (self.distances[arucoId] / self.filterFrames).tolist(), rvec.tolist(), tvec.tolist()]
             del self.distances[arucoId]
             del self.missingFrames[arucoId]
             del self.frameCount[arucoId]

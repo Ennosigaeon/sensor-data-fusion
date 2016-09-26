@@ -17,6 +17,7 @@ def unix_time_millis(dt):
 
 class Capture:
     def __init__(self):
+        self.phio = []
         self.rawSensorData = []
         self.markers = []
         self.sensorIndex = -1
@@ -32,18 +33,22 @@ class Capture:
             return
         self.markers.append({"markers": markers, "time": unix_time_millis(datetime.now())})
 
+    def addPhiO(self, orientation):
+        self.phio.append(orientation)
+
     def store(self, filename):
         self.rawSensorData = sorted(self.rawSensorData, key=lambda d: d["time"])
         self.markers = sorted(self.markers, key=lambda m: m["time"], reverse=True)
 
         with open(filename, "w") as f:
-            s = json.dumps({"rawSensorData": self.rawSensorData, "markers": self.markers})
+            s = json.dumps({"rawSensorData": self.rawSensorData, "markers": self.markers, "phio": self.phio})
             f.write(s)
 
     def load(self, filename):
         with open(filename, "r") as f:
             lines = f.readline()
             data = json.loads(lines)
+            self.phio = data["phio"]
             self.markers = data["markers"]
             self.rawSensorData = data["rawSensorData"]
 
@@ -53,8 +58,7 @@ class Capture:
             return None
 
         dp = self.rawSensorData[self.sensorIndex]
-        # TODO remove / 1000. Only correct for first record.
-        return (dp["speed"], dp["orientation"], datetime.fromtimestamp(dp["time"] / 1000, pytz.utc))
+        return (dp["speed"], dp["orientation"], datetime.fromtimestamp(dp["time"], pytz.utc))
 
     def playbackMarker(self):
         if (self.sensorIndex + 1 >= len(self.rawSensorData) or len(self.markers) <= 0):
@@ -68,16 +72,16 @@ class Capture:
 
 if (__name__ == "__main__"):
     map = Map()
-    map.addLandmark(Landmark(0, Position(0, 0)))
-    map.addLandmark(Landmark(1, Position(0, 1)))
-    map.addLandmark(Landmark(2, Position(2, 1)))
-    map.addLandmark(Landmark(3, Position(2, 0)))
-    map.addLandmark(Landmark(4, Position(1, 0.5)))
+    map.addLandmark(Landmark(0, Position(2, 0)))
+    map.addLandmark(Landmark(1, Position(2, -1)))
+    map.addLandmark(Landmark(2, Position(0, -1)))
+    map.addLandmark(Landmark(3, Position(0, 0)))
+    # TODO: x is inverted
+    map.addLandmark(Landmark(4, Position(-1, -0.5)))
 
     capture = Capture()
-    capture.load("../../Contrib/test_flight.json")
-    # TODO remove / 1000. Only correct for first record.
-    DR = DeadReckoning(Position(0, 0), datetime.fromtimestamp(capture.rawSensorData[0]["time"] / 1000, pytz.utc))
+    capture.load("../test_flight2.json")
+    DR = DeadReckoning(Position(0, 0), datetime.fromtimestamp(capture.rawSensorData[0]["time"], pytz.utc))
 
     while (True):
         sensor = capture.playbackSensor()
@@ -92,5 +96,5 @@ if (__name__ == "__main__"):
             DR.updateConfPos(position, time)
             print markers
         sleep(0.01)
-    DR.drawCorrectedPath()
+    # DR.drawCorrectedPath()
     plt.pause(10)

@@ -22,11 +22,11 @@ output = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'XVID'), config.fp
                          (config.imageWidth, config.imageHeight))
 
 map = Map()
-map.addLandmark(Landmark(0, Position(0, 0)))
-map.addLandmark(Landmark(1, Position(0, 1)))
-map.addLandmark(Landmark(2, Position(2, 1)))
-map.addLandmark(Landmark(3, Position(2, 0)))
-map.addLandmark(Landmark(4, Position(1, 0.5)))
+map.addLandmark(Landmark(0, Position(2, 0)))
+map.addLandmark(Landmark(1, Position(2, -1)))
+map.addLandmark(Landmark(2, Position(0, -1)))
+map.addLandmark(Landmark(3, Position(0, 0)))
+map.addLandmark(Landmark(4, Position(1, -0.5)))
 # Initialize drone and deadReckoning
 drone = extDrone.Drone()
 drone.startup()
@@ -40,13 +40,15 @@ capture = Capture()
 
 navData = drone.getNextDataSet()
 
+captureData = False
 # Drone execution loop
 while (1):
     # Wait for new NavData and update deadReckoning
-    navData = drone.getNextDataSet()
-    if (navData):
-        DR.updatePos(drone.getSpeed(navData), drone.getOrientation(navData))
-        capture.addRawSensorData(drone.getSpeed(navData), drone.getOrientation(navData))
+    if (captureData):
+        navData = drone.getNextDataSet()
+        if (navData):
+            DR.updatePos(drone.getSpeed(navData), drone.getOrientation(navData))
+            capture.addRawSensorData(drone.getSpeed(navData), drone.getOrientation(navData))
 
     # Marker detection
     image = drone.getNextVideoFrame()
@@ -55,7 +57,7 @@ while (1):
     cv2.imshow("Image", image)
     capture.addMarker(markers)
 
-    if (len(markers) > 0):
+    if (captureData and len(markers) > 0):
         print "Detected marker/s {}".format(markers)
         position = map.determinePosition(markers)
         # DR.updateConfPos(position)
@@ -66,11 +68,12 @@ while (1):
     key = cv2.waitKey(1) & 0xFF
     key = None if key > 127 else chr(key)
     if key:
-        print key
-        if (key == ' '):
-            DR.setPhioToValue(drone.getOrientation(navData))
-
         drone.simplePiloting(key)
+        if (key == 'r'):
+            captureData = not captureData
+            if (captureData):
+                DR.setPhioToValue(drone.getOrientation(navData))
+                capture.addPhiO(drone.getOrientation(navData))
         if (key == '0'):
             break
 

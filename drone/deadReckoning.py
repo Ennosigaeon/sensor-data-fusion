@@ -47,6 +47,8 @@ class DeadReckoning:
         self.phio = phi
 
     def updatePos(self, speed, phid, time=None):
+        print "{} {} {} {}".format(phid, (phid - self.phio) % 360, speed[0], speed[1])
+
         # adjusting angle (phid is in degree, phi is in radian)
         phi = (((phid - self.phio) % 360) / 180) * math.pi
 

@@ -118,18 +118,8 @@ class Drone(ps_drone.Drone):
             self.moveBackward()
         elif key == 'd':
             self.moveRight()
-        elif key == '+':
-            self.__speed = min(1, self.__speed + 0.01)
-            self.setSpeed(self.__speed)
-            print " drone speed is now " + str(self.__speed)
-        elif key == '-':
-            self.__speed = max(0, self.__speed - 0.01)
-            self.setSpeed(self.__speed)
-            print " drone speed is now " + str(self.__speed)
-        elif key == 'u':
-            self.moveUp()
-        elif key == 'j':
-            self.moveDown()
+        elif key == 'f':
+            self.hover()
 
     def getSpeed(self, navData=None):
         """

@@ -108,22 +108,16 @@ class Drone(ps_drone.Drone):
                 print " drone has landed"
         elif key == 'q':
             self.turnLeft()
-            print " drone turns left"
         elif key == 'w':
             self.moveForward()
-            print " drone flies forwards"
         elif key == 'e':
             self.turnRight()
-            print " drone turns right"
         elif key == 'a':
             self.moveLeft()
-            print " drone flies to the left"
         elif key == 's':
             self.moveBackward()
-            print " drone flies backwards"
         elif key == 'd':
             self.moveRight()
-            print " drone flies to the right"
         elif key == '+':
             self.__speed = min(1, self.__speed + 0.01)
             self.setSpeed(self.__speed)
@@ -134,13 +128,8 @@ class Drone(ps_drone.Drone):
             print " drone speed is now " + str(self.__speed)
         elif key == 'u':
             self.moveUp()
-            print " drone moves up"
         elif key == 'j':
             self.moveDown()
-            print " drone moves down"
-        else:
-            self.stop()
-            print " drone stopped"
 
     def getSpeed(self, navData=None):
         """

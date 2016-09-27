@@ -1,19 +1,17 @@
 #!/usr/bin/env python
 
-# TODO: test this code
-
 import datetime
 import math
 import os
 import sys
-
 from time import sleep
 
 import matplotlib.pyplot as plt
 
+from drone.kalman import KalmanFilter
 from extDrone import Drone
-from plot import RealTimePlot
 from map import Position
+from plot import RealTimePlot
 
 
 def createFolder(path):
@@ -39,6 +37,9 @@ class DeadReckoning:
         self.rtp = RealTimePlot()
         self.rtp.addPoint(self.pos.x, self.pos.y, "b")
 
+        self.kalmanFilter = KalmanFilter()
+        self.kalmanFilter.predict(self.pos)
+
     def setPhiToZero(self, drone):
         self.phio = drone.navData["demo"][2][2]
 
@@ -47,7 +48,8 @@ class DeadReckoning:
         self.phio = phi
 
     def updatePos(self, speed, phid, time=None):
-        print "{} {} {} {}".format(phid, (phid - self.phio) % 360, speed[0], speed[1])
+        if (not time):
+            print "{} {} {} {}".format(phid, (phid - self.phio) % 360, speed[0], speed[1])
 
         # adjusting angle (phid is in degree, phi is in radian)
         phi = (((phid - self.phio) % 360) / 180) * math.pi
@@ -59,7 +61,8 @@ class DeadReckoning:
         self.lastTimestamp = time
 
         # calculating expected position
-        self.pos = self.pos.updatePosition(speed[0], speed[1], phi, deltaTime)
+        currentPos = self.pos.updatePosition(speed[0], speed[1], phi, deltaTime)
+        self.pos, cov = self.kalmanFilter.predict(currentPos)
 
         self.historyPos.append(self.pos)
         self.historyPosCor.append(self.pos)
@@ -69,12 +72,13 @@ class DeadReckoning:
         self.rtp.plot()
 
     def updateConfPos(self, position, time=None):
+        position, cov = self.kalmanFilter.update(position)
+
         self.rtp.addPoint(position.x, position.y, "r")
         self.rtp.plot()
         if (time is None):
             time = datetime.datetime.now()
 
-        # TODO use Kalman filter
         self.pos = position
         self.historyPos.append(position)
         self.historyPosCor.append(position)
@@ -116,9 +120,7 @@ if (__name__ == "__main__"):
     drone.defaultInit()
 
     DR = DeadReckoning(Position(0, 0))
-
-    # Change if yaw is wrong
-    # DR.setPhiToZero(drone.getOrientation())
+    DR.setPhiToZero(drone.getOrientation())
 
     while (1):
         navData = drone.getNextDataSet()

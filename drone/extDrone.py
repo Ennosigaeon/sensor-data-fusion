@@ -36,8 +36,8 @@ class Drone(ps_drone.Drone):
             time.sleep(0.1)
         print "Battery: " + str(self.getBattery()[0]) + "% " + str(self.getBattery()[1])
 
-    def getNextDataSet(self):
-        if (self.NavDataCount == self.lastNDC):
+    def getNextDataSet(self, force=False):
+        if (self.NavDataCount == self.lastNDC and not force):
             return None
         self.lastNDC = self.NavDataCount
         return self.NavData

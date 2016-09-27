@@ -23,10 +23,10 @@ output = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'XVID'), config.fp
 
 map = Map()
 map.addLandmark(Landmark(0, Position(2, 0)))
-map.addLandmark(Landmark(1, Position(2, -1)))
-map.addLandmark(Landmark(2, Position(0, -1)))
+map.addLandmark(Landmark(1, Position(2, 1)))
+map.addLandmark(Landmark(2, Position(0, 1)))
 map.addLandmark(Landmark(3, Position(0, 0)))
-map.addLandmark(Landmark(4, Position(1, -0.5)))
+map.addLandmark(Landmark(4, Position(1, 0.5)))
 # Initialize drone and deadReckoning
 drone = extDrone.Drone()
 drone.startup()
@@ -37,8 +37,6 @@ drone.startCamera(config.fps)
 DR = deadReckoning.DeadReckoning(Position(0, 0))
 markerDetector = detectMarker.MarkerDetector(config)
 capture = Capture()
-
-navData = drone.getNextDataSet()
 
 captureData = False
 # Drone execution loop
@@ -57,8 +55,8 @@ while (1):
     cv2.imshow("Image", image)
     capture.addMarker(markers)
 
-    if (captureData and len(markers) > 0):
-        print "Detected marker/s {}".format(markers)
+    if (len(markers) > 0):
+        print "Detected marker/s {} {}".format(markers[0][0], markers[0][1])
         position = map.determinePosition(markers)
         # DR.updateConfPos(position)
 
@@ -72,6 +70,7 @@ while (1):
         if (key == 'r'):
             captureData = not captureData
             if (captureData):
+                navData = drone.getNextDataSet(force=True)
                 DR.setPhioToValue(drone.getOrientation(navData))
                 capture.addPhiO(drone.getOrientation(navData))
         if (key == '0'):

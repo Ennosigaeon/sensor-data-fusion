@@ -73,28 +73,26 @@ class Capture:
 if (__name__ == "__main__"):
     map = Map()
     map.addLandmark(Landmark(0, Position(2, 0)))
-    map.addLandmark(Landmark(1, Position(2, -1)))
-    map.addLandmark(Landmark(2, Position(0, -1)))
+    map.addLandmark(Landmark(1, Position(2, 1)))
+    map.addLandmark(Landmark(2, Position(0, 1)))
     map.addLandmark(Landmark(3, Position(0, 0)))
-    # TODO: x is inverted
-    map.addLandmark(Landmark(4, Position(-1, -0.5)))
+    map.addLandmark(Landmark(4, Position(1, 0.5)))
 
     capture = Capture()
-    capture.load("../test_flight2.json")
+    capture.load("../test_flight_hourglass.json")
     DR = DeadReckoning(Position(0, 0), datetime.fromtimestamp(capture.rawSensorData[0]["time"], pytz.utc))
+    DR.setPhioToValue(capture.phio[0])
 
     while (True):
         sensor = capture.playbackSensor()
         if (not sensor):
             break
         DR.updatePos(sensor[0], sensor[1], sensor[2])
-        print sensor
 
         markers, time = capture.playbackMarker()
         if (markers):
             position = map.determinePosition(markers)
             DR.updateConfPos(position, time)
-            print markers
         sleep(0.01)
     # DR.drawCorrectedPath()
     plt.pause(10)

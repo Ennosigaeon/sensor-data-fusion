@@ -64,6 +64,50 @@ class Map:
                 raise ValueError("Invalid marker id {}".format(arucoId))
             x += self.landmarks[arucoId].position.x - distance[0]
             y += self.landmarks[arucoId].position.y - distance[1]
+            # TODO: angle update based on marker yaw
         x /= len(markers)
         y /= len(markers)
         return Position(x, y)
+        
+def defaultMap():
+    map = Map()
+    map.addLandmark(Landmark(0, Position(2, 0)))
+    map.addLandmark(Landmark(1, Position(2, 1)))
+    map.addLandmark(Landmark(2, Position(0, 1)))
+    map.addLandmark(Landmark(3, Position(0, 0)))
+    map.addLandmark(Landmark(4, Position(1, 0.5)))
+    map.addLandmark(Landmark(5, Position(0, 0.5)))
+    map.addLandmark(Landmark(6, Position(1, 0)))
+    map.addLandmark(Landmark(7, Position(1, 1)))
+    map.addLandmark(Landmark(8, Position(0.5, 0.5)))
+    map.addLandmark(Landmark(9, Position(1.5, 0.5)))
+    map.addLandmark(Landmark(10, Position(2, 0.5)))
+    map.addLandmark(Landmark(11, Position(2, -0.5)))
+    map.addLandmark(Landmark(12, Position(0, -0.5)))
+    map.addLandmark(Landmark(13, Position(0.5, -0.5)))
+    map.addLandmark(Landmark(14, Position(1, -0.5)))
+    map.addLandmark(Landmark(15, Position(1.5, -0.5)))
+    map.addLandmark(Landmark(16, Position(0, -1)))
+    map.addLandmark(Landmark(17, Position(0.5, 0)))
+    map.addLandmark(Landmark(18, Position(1, -1)))
+    map.addLandmark(Landmark(19, Position(1.5, 0)))
+    map.addLandmark(Landmark(20, Position(2, -1)))
+    map.addLandmark(Landmark(21, Position(1.5, 1)))
+    map.addLandmark(Landmark(22, Position(0.5, 1)))
+    map.addLandmark(Landmark(23, Position(0.5, -1)))
+    map.addLandmark(Landmark(24, Position(1.5, -1)))
+    map.addLandmark(Landmark(25, Position(-0.5, 1)))
+    map.addLandmark(Landmark(26, Position(-0.5, 0.5)))
+    map.addLandmark(Landmark(27, Position(-0.5, 0)))
+    map.addLandmark(Landmark(28, Position(-0.5, -0.5)))
+    map.addLandmark(Landmark(29, Position(-0.5, -1)))
+    return map
+
+def simpleMap():
+    map = Map()
+    map.addLandmark(Landmark(0, Position(2, 0)))
+    map.addLandmark(Landmark(1, Position(2, 1)))
+    map.addLandmark(Landmark(2, Position(0, 1)))
+    map.addLandmark(Landmark(3, Position(0, 0)))
+    map.addLandmark(Landmark(4, Position(1, 0.5)))
+    return map

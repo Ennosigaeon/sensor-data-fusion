@@ -4,10 +4,10 @@ import argparse
 
 import cv2
 
-from drone import deadReckoning, detectMarker, extDrone
+from drone import deadReckoning, detectMarker, extDrone, map
 from drone.capture import Capture
 from drone.config import Config
-from drone.map import Map, Landmark, Position
+from drone.map import Landmark, Position
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--calibration", action="store", type=str, required=True, help="Path to calibration file")
@@ -21,12 +21,7 @@ config.fps = 15.0
 output = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'XVID'), config.fps,
                          (config.imageWidth, config.imageHeight))
 
-map = Map()
-map.addLandmark(Landmark(0, Position(2, 0)))
-map.addLandmark(Landmark(1, Position(2, 1)))
-map.addLandmark(Landmark(2, Position(0, 1)))
-map.addLandmark(Landmark(3, Position(0, 0)))
-map.addLandmark(Landmark(4, Position(1, 0.5)))
+map = map.defaultMap()
 # Initialize drone and deadReckoning
 drone = extDrone.Drone()
 drone.startup()

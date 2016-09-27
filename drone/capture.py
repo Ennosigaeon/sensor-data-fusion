@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 import pytz
 
 from drone.deadReckoning import DeadReckoning
-from drone.map import Position, Map, Landmark
+from drone.map import Position, Landmark
+from drone import map
 
 epoch = datetime.utcfromtimestamp(0)
 
@@ -71,12 +72,7 @@ class Capture:
 
 
 if (__name__ == "__main__"):
-    map = Map()
-    map.addLandmark(Landmark(0, Position(2, 0)))
-    map.addLandmark(Landmark(1, Position(2, 1)))
-    map.addLandmark(Landmark(2, Position(0, 1)))
-    map.addLandmark(Landmark(3, Position(0, 0)))
-    map.addLandmark(Landmark(4, Position(1, 0.5)))
+    map = map.defaultMap()
 
     capture = Capture()
     capture.load("../test_flight_hourglass.json")

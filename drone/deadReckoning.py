@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import datetime
 import math
 import os
@@ -25,8 +24,9 @@ def createFolder(path):
 class DeadReckoning:
     def __init__(self, position, time=None):
         self.pos = position
+        self.rawPos = position
+        self.historyRaw = [position]
         self.historyPos = [position]
-        self.historyPosCor = [position]
         self.historyTime = [datetime.datetime.now()]
         self.historyConfirmed = []
         self.timeStart = datetime.datetime.now()
@@ -39,6 +39,9 @@ class DeadReckoning:
 
         self.kalmanFilter = KalmanFilter()
         self.kalmanFilter.predict(self.pos)
+
+        self.rawKalmanFilter = KalmanFilter()
+        self.rawKalmanFilter.predict(self.rawPos)
 
     def setPhiToZero(self, drone):
         self.phio = drone.navData["demo"][2][2]
@@ -65,8 +68,11 @@ class DeadReckoning:
         self.pos, cov = self.kalmanFilter.predict(currentPos)
 
         self.historyPos.append(self.pos)
-        self.historyPosCor.append(self.pos)
         self.historyTime.append(time)
+
+        currentRawPos = self.rawPos.updatePosition(speed[0], speed[1], phi, deltaTime)
+        self.rawPos, cov = self.rawKalmanFilter.predict(currentRawPos)
+        self.historyRaw.append(self.rawPos)
 
         self.rtp.addPoint(self.pos.x, self.pos.y, "b")
         self.rtp.plot()
@@ -81,7 +87,6 @@ class DeadReckoning:
 
         self.pos = position
         self.historyPos.append(position)
-        self.historyPosCor.append(position)
         self.historyTime.append(time)
         self.historyConfirmed.append(len(self.historyPos) - 1)
 
@@ -97,21 +102,23 @@ class DeadReckoning:
             for i in range(self.historyConfirmed[-2], self.historyConfirmed[-1]):
                 deltaTime = (self.historyTime[i] - self.historyTime[self.historyConfirmed[-2]]).total_seconds()
                 fracTime = 1.0 * deltaTime / deltaTotal
-                self.historyPosCor[i].x = self.historyPos[i].x + fracTime * deltaPosX
-                self.historyPosCor[i].y = self.historyPos[i].y + fracTime * deltaPosY
+                self.historyPos[i].x += fracTime * deltaPosX
+                self.historyPos[i].y += fracTime * deltaPosY
         else:
             deltaPosX = self.historyPos[self.historyConfirmed[-1]].x - self.historyPos[self.historyConfirmed[-1] - 1].x
             deltaPosY = self.historyPos[self.historyConfirmed[-1]].y - self.historyPos[self.historyConfirmed[-1] - 1].y
 
             for i in range(0, self.historyConfirmed[-1]):
-                self.historyPosCor[i].x = self.historyPos[i].x + deltaPosX
-                self.historyPosCor[i].y = self.historyPos[i].y + deltaPosY
+                self.historyPos[i].x += deltaPosX
+                self.historyPos[i].y += deltaPosY
 
     def drawCorrectedPath(self):
         rtp = RealTimePlot()
-        for position in self.historyPosCor:
+        for position in self.historyRaw:
+            rtp.addPoint(position.x, position.y, "b")
+        for position in self.historyPos:
             rtp.addPoint(position.x, position.y, "g")
-        rtp.plot()
+        rtp.plot(labelB="Dead Reckoning", labelG="Corrected path")
         return rtp
 
 

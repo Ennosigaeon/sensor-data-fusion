@@ -68,7 +68,8 @@ class Map:
         x /= len(markers)
         y /= len(markers)
         return Position(x, y)
-        
+
+
 def defaultMap():
     map = Map()
     map.addLandmark(Landmark(0, Position(2, 0)))
@@ -102,6 +103,7 @@ def defaultMap():
     map.addLandmark(Landmark(28, Position(-0.5, -0.5)))
     map.addLandmark(Landmark(29, Position(-0.5, -1)))
     return map
+
 
 def simpleMap():
     map = Map()

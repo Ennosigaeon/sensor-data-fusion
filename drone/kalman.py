@@ -4,7 +4,7 @@ import numpy as np
 class KalmanFilter:
     def __init__(self):
         # noise terms v -> measurement cov, w -> process covariance
-        self.v = np.matrix([[0.01, 0], [0, 0.01]])
+        self.v = np.matrix([[0.5, 0], [0, 0.5]])
         self.w = np.matrix([[0.09, 0], [0, 0.08]])
 
         # state and state covariance

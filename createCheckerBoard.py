@@ -13,8 +13,8 @@ parser.add_argument("-o", "--output", action="store", type=str, required=True,
                     help="Either filename for checkerboard or folder to store markers in")
 parser.add_argument("-r", "--rows", action="store", type=int, default=5, help="Number of rows in checker board")
 parser.add_argument("-c", "--columns", action="store", type=int, default=8, help="Number of columns in checker board")
-parser.add_argument("-p", "--pixel", action="store", type=int, default=200, help="Size of one marker in pixel")
-parser.add_argument("-n", "--number", action="store", type=int, default=200, help="Number of markers to be created")
+parser.add_argument("-p", "--pixel", action="store", type=int, default=300, help="Size of one marker in pixel")
+parser.add_argument("-n", "--number", action="store", type=int, default=50, help="Number of markers to be created")
 args = parser.parse_args()
 
 if args.target == "board":

@@ -112,6 +112,7 @@ class DeadReckoning:
         for position in self.historyPosCor:
             rtp.addPoint(position.x, position.y, "g")
         rtp.plot()
+        return rtp
 
 
 if (__name__ == "__main__"):

@@ -4,6 +4,7 @@ from time import sleep
 
 import matplotlib.pyplot as plt
 import pytz
+from matplotlib import animation
 
 from drone.deadReckoning import DeadReckoning
 from drone.map import Position, Landmark
@@ -71,23 +72,41 @@ class Capture:
         return (None, None)
 
 
+def renderNextFrame(capture, map):
+    sensor = capture.playbackSensor()
+    if (not sensor):
+        return False
+    DR.updatePos(sensor[0], sensor[1], sensor[2])
+
+    markers, time = capture.playbackMarker()
+    if (markers):
+        position = map.determinePosition(markers)
+        DR.updateConfPos(position, time)
+    return True
+
+
 if (__name__ == "__main__"):
     map = map.defaultMap()
+    storeVideo = True
 
     capture = Capture()
     capture.load("../test_flight4.json")
     DR = DeadReckoning(Position(0, 0), datetime.fromtimestamp(capture.rawSensorData[0]["time"], pytz.utc))
     DR.setPhioToValue(capture.phio[0])
 
-    while (True):
-        sensor = capture.playbackSensor()
-        if (not sensor):
-            break
-        DR.updatePos(sensor[0], sensor[1], sensor[2])
+    if (storeVideo):
+        writer = animation.writers['ffmpeg']
+        writer = writer(fps=15.0, metadata=dict(artist='Me'), bitrate=1800)
+        with writer.saving(DR.rtp.plt, "path.mp4", 100):
+            cont = True
+            while (cont):
+                cont = renderNextFrame(capture, map)
+                writer.grab_frame()
+    else:
+        cont = True
+        while (cont):
+            cont = renderNextFrame(capture, map)
 
-        markers, time = capture.playbackMarker()
-        if (markers):
-            position = map.determinePosition(markers)
-            DR.updateConfPos(position, time)
-    DR.drawCorrectedPath()
+    rtp = DR.drawCorrectedPath()
+    rtp.plt.savefig('corrected_path.png')
     plt.pause(60)

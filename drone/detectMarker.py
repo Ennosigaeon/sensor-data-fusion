@@ -1,4 +1,5 @@
 import argparse
+import math
 import numpy as np
 from cv2 import aruco
 
@@ -9,7 +10,7 @@ import config
 
 # noinspection PyMethodMayBeStatic,PyShadowingNames
 class MarkerDetector:
-    def __init__(self, config, filterFrames=15, dictionary=aruco.getPredefinedDictionary(aruco.DICT_4X4_50)):
+    def __init__(self, config, filterFrames=5, dictionary=aruco.getPredefinedDictionary(aruco.DICT_4X4_50)):
         self.config = config
         self.filterFrames = filterFrames
         self.dictionary = dictionary
@@ -68,6 +69,8 @@ class MarkerDetector:
             dist = self.distances[arucoId] / (2 * self.filterFrames)
             dist = np.array([-dist[1], dist[0]])
             res = [int(arucoId), (dist).tolist(), rvec.tolist(), tvec.tolist()]
+            if (math.sqrt(dist[0] ** 2 + dist[1] ** 2) > 0.25):
+                res = None
             del self.distances[arucoId]
             del self.missingFrames[arucoId]
             del self.frameCount[arucoId]

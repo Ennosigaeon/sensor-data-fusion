@@ -108,9 +108,10 @@ class DeadReckoning:
                 self.historyPosCor[i].y = self.historyPos[i].y + deltaPosY
 
     def drawCorrectedPath(self):
+        rtp = RealTimePlot()
         for position in self.historyPosCor:
-            self.rtp.addPoint(position.x, position.y, "g")
-        self.rtp.plot()
+            rtp.addPoint(position.x, position.y, "g")
+        rtp.plot()
 
 
 if (__name__ == "__main__"):

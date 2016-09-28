@@ -67,7 +67,7 @@ class Capture:
 
         if (self.rawSensorData[self.sensorIndex + 1]["time"] > self.markers[-1]["time"]):
             m = self.markers.pop()
-            return (m["markers"], datetime.fromtimestamp(m["time"] / 1000, pytz.utc))
+            return (m["markers"], datetime.fromtimestamp(m["time"], pytz.utc))
         return (None, None)
 
 
@@ -75,7 +75,7 @@ if (__name__ == "__main__"):
     map = map.defaultMap()
 
     capture = Capture()
-    capture.load("../test_flight_hourglass.json")
+    capture.load("../test_flight4.json")
     DR = DeadReckoning(Position(0, 0), datetime.fromtimestamp(capture.rawSensorData[0]["time"], pytz.utc))
     DR.setPhioToValue(capture.phio[0])
 
@@ -89,6 +89,5 @@ if (__name__ == "__main__"):
         if (markers):
             position = map.determinePosition(markers)
             DR.updateConfPos(position, time)
-        sleep(0.01)
-    # DR.drawCorrectedPath()
-    plt.pause(10)
+    DR.drawCorrectedPath()
+    plt.pause(60)

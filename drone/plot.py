@@ -28,12 +28,13 @@ class RealTimePlot:
             self.y[color].append(y)
         self._updateBorders(x, y)
 
-    def plot(self):
+    def plot(self, labelR=None, labelG=None, labelB=None):
         self.plt.canvas.restore_region(self.background)
-        self.ax.draw_artist(self.ax.plot(self.x['b'], self.y['b'], 'b')[0])
+        self.ax.draw_artist(self.ax.plot(self.x['b'], self.y['b'], 'b', label=labelB)[0])
         for i in range(len(self.x['r'])):
-            self.ax.draw_artist(self.ax.plot(self.x['r'][i], self.y['r'][i], 'r')[0])
-        self.ax.draw_artist(self.ax.plot(self.x['g'], self.y['g'], 'g')[0])
+            self.ax.draw_artist(self.ax.plot(self.x['r'][i], self.y['r'][i], 'r', label=labelR)[0])
+        self.ax.draw_artist(self.ax.plot(self.x['g'], self.y['g'], 'g', label=labelG)[0])
+        self.ax.legend()
         self.plt.canvas.blit(self.ax.bbox)
 
     def _updateBorders(self, x, y):

@@ -192,6 +192,6 @@ Since there were still jumps when a marker was detected, we used the following a
 
 In this project, we used marker detection, dead reckoning and Kalman filter to enable a drone to determine its position and flight path in a known map. We did so by fusing the drone's internal velocity estimation with the detection of ArUco markers.
 
-Problems we encountered were the errors of the drone's speed estimation, resulting from inaccuracies of the accelerometer and gyrometer. With the help of our Kalman filter implementation, we were able to reduce the influence of that noise, while we provided a smoothed trajectory via algebraic methods.
+Problems we encountered were that the dead reckoning alone drifts significantly. Furthermore, the trajectory could be improved by using more markers.Triangulation could have been used to improve the position estimation. However, the small camera viewport made detection of multiple markers difficult. In future projects, an extension by a SLAM implementation could theoretically be possible.
 
 \end{document}
